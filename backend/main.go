@@ -1,8 +1,8 @@
 package main
 
 import (
-	"proyecto2025-cuello-kipran-chihadeh/controllers"
-	"proyecto2025-cuello-kipran-chihadeh/domain"
+	"proyecto2025-cuello-kipran-chihadeh./controllers"
+	"proyecto2025-cuello-kipran-chihadeh./domain"
 )
 
 func mostrar(user domain.Usuario) {
