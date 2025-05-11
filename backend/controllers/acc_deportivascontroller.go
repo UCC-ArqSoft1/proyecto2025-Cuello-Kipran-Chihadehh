@@ -3,7 +3,7 @@ package controllers
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"proyecto2025-cuello-kipran-chihadeh/domain"
+	"proyecto2025-cuello-kipran-chihadeh./domain"
 )
 
 var usuarios []domain.Usuario // Simula una "base de datos" temporal
