@@ -7,7 +7,7 @@ import (
 
 func mostrar(user domain.Usuario) {
 	println(user.ID_usuario, "\n",
-		user.Mail,
+		user.ID_usuario,
 		"\n",
 		user.Contraseña)
 	return
@@ -15,10 +15,7 @@ func mostrar(user domain.Usuario) {
 func main() {
 	var usuario1 = domain.Usuario{
 		ID_usuario: 1,
-		Nombre:     "juan",
-		Apellido:   "perez",
-		DNI:        46032879,
-		Mail:       "agus123@gmail.com",
+		Username:   "ismael",
 		Contraseña: "12345678",
 		Is_admin:   false,
 	}

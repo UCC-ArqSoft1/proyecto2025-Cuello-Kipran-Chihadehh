@@ -9,7 +9,6 @@ type ActDeportiva struct {
 	Id_categoria int
 	Id_horario   int
 	Descripcion  string
-	Horario      string
 }
 type categoria struct {
 	ID_categoria int
@@ -24,10 +23,7 @@ type Horario struct {
 type Usuario struct {
 	ID_usuario int
 	ID_token   int
-	Nombre     string
-	Apellido   string
-	DNI        int
-	Mail       string
+	Username   string
 	Contraseña string
 	Is_admin   bool
 }
@@ -37,4 +33,14 @@ type Token struct {
 	Id_token int
 	Activo   bool
 	Token    string
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	UserID int    `json:"user_id"`
+	Token  string `json:"token"`
 }
