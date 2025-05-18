@@ -50,17 +50,34 @@ func NewMysqlClient() *MysqlClient {
 	}
 }
 
+type UserClient interface {
+	GetUserByUsername(username string) (dao.User, error)
+	GetUserByID(userID int) (dao.User, error)
+	CreateUser(user dao.User) (dao.User, error)
+	GetAllActivities() ([]dao.Activity, error)
+	GetActivityByID(activityID int) (dao.Activity, error)
+	SearchActivities(query string) ([]dao.Activity, error)
+	CreateActivity(activity dao.Activity) (dao.Activity, error)
+	UpdateActivity(activityID int, updatedActivity dao.Activity) (dao.Activity, error)
+	DeleteActivity(activityID int) error
+	GetAllCategories() ([]dao.Category, error)
+	CreateCategory(category dao.Category) (dao.Category, error)
+	GetAllTimeSlots() ([]dao.TimeSlot, error)
+	CreateTimeSlot(timeSlot dao.TimeSlot) (dao.TimeSlot, error)
+	CreateInscription(inscription dao.Inscription) (dao.Inscription, error)
+	GetUserInscriptions(userID int) ([]dao.Inscription, error)
+	CancelInscription(inscriptionID int, userID int) error
+}
+
 // ===== MÉTODOS PARA USUARIOS =====
 
 func (c *MysqlClient) GetUserByUsername(username string) (dao.User, error) {
-	var user dao.User
-
-	err := c.DB.Where("username = ?", username).First(&user).Error
-	if err != nil {
-		return dao.User{}, fmt.Errorf("error getting user by username: %w", err)
+	var userDAO dao.User
+	txn := c.DB.First(&userDAO, "username = ?", username)
+	if txn.Error != nil {
+		return dao.User{}, fmt.Errorf("error getting user: %w", txn.Error)
 	}
-
-	return user, nil
+	return userDAO, nil
 }
 
 func (c *MysqlClient) GetUserByID(userID int) (dao.User, error) {
@@ -99,7 +116,7 @@ func (c *MysqlClient) GetAllActivities() ([]dao.Activity, error) {
 
 func (c *MysqlClient) GetActivityByID(activityID int) (dao.Activity, error) {
 	var activity dao.Activity
-
+	// Preload las relaciones necesarias
 	err := c.DB.Preload("Categoria").Preload("Horario").
 		First(&activity, activityID).Error
 	if err != nil {

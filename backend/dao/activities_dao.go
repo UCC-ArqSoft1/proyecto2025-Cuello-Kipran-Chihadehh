@@ -30,26 +30,22 @@ type TimeSlot struct {
 
 // Actividad deportiva
 type Activity struct {
-	ID_actividad int       `gorm:"primary_key;auto_increment" json:"id_actividad"`
-	Nombre       string    `gorm:"unique;not null;size:100" json:"nombre"`
-	Descripcion  string    `gorm:"type:text" json:"descripcion"`
-	Profesor     string    `gorm:"not null;size:100" json:"profesor"` // Nombre del profesor
-	Cupos        int       `gorm:"not null;default:1" json:"cupos"`   // Cupos disponibles
-	Precio       float64   `gorm:"type:decimal(10,2)" json:"precio"`  // Precio de la actividad
-	Imagen_url   string    `gorm:"size:255" json:"imagen_url"`        // URL de la imagen
-	Activa       bool      `gorm:"default:true" json:"activa"`        // Si está disponible
-	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
-	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	ID_actividad int    `gorm:"primary_key;auto_increment" json:"id_actividad"`
+	Nombre       string `gorm:"unique;not null;size:100" json:"nombre"`
+	Descripcion  string `gorm:"type:text" json:"descripcion"`
+	Profesor     string `gorm:"not null;size:100" json:"profesor"`  // Nombre del profesor
+	Cupos        int    `gorm:"not null;default:1" json:"cupos"`    // Cupos disponibles
+	Fecha        string `gorm:"not null;size:10" json:"fecha"`      // Fecha de la actividad
+	Hora_inicio  string `gorm:"not null;size:5" json:"hora_inicio"` // Hora de inicio (HH:MM)
+	Duracion     string `gorm:"not null;size:5" json:"duracion"`    // Duración de la actividad (HH:MM)
 
 	// Foreign Keys
 	Id_usuario   int `gorm:"not null" json:"id_usuario"`   // Usuario que creó la actividad (admin)
 	Id_categoria int `gorm:"not null" json:"id_categoria"` // Categoría de la actividad
-	Id_horario   int `gorm:"not null" json:"id_horario"`   // Horario de la actividad
 
 	// Relaciones
 	Usuario      User          `gorm:"foreignKey:Id_usuario;constraint:OnDelete:CASCADE" json:"-"`
 	Categoria    Category      `gorm:"foreignKey:Id_categoria;constraint:OnDelete:CASCADE" json:"categoria"`
-	Horario      TimeSlot      `gorm:"foreignKey:Id_horario;constraint:OnDelete:CASCADE" json:"horario"`
 	Inscriptions []Inscription `gorm:"foreignKey:ID_actividad" json:"-"` // Inscripciones a esta actividad
 }
 

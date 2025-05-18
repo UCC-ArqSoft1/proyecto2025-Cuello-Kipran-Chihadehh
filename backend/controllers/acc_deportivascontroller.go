@@ -3,10 +3,16 @@ package controllers
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"net/http"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/domain"
+	"proyecto2025-Cuello-Kipran-Chihadehh/backend/services"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 var usuarios []domain.Usuario // Simula una "base de datos" temporal
+var userService *services.UserService
 
 func RegisterUser(u domain.Usuario) domain.Usuario {
 	// Hashear contraseña
@@ -23,27 +29,50 @@ func RegisterUser(u domain.Usuario) domain.Usuario {
 	return u
 }
 
-/*
-import (
-	"backend/services"
-	"strconv"
-
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
-func GetHotelByID(ctx *gin.Context) {
-	ctx.Header("Access-Control-Allow-Origin", "*")
-	ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	ctx.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-	hotelIDString := ctx.Param("id")
-	hotelIDInt, err := strconv.Atoi(hotelIDString)
-	if err != nil {
-		ctx.String(http.StatusBadRequest, "ID invalido")
+func Login(ctx *gin.Context) {
+	var request domain.LoginRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	hotel := services.GetHotelByID(hotelIDInt)
-	ctx.JSON(http.StatusOK, hotel)
-}*/
+
+	userID, token, err := services.Login(request.Username, request.Password)
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"user_id": userID,
+		"token":   token,
+	})
+}
+
+func GetActivityByID(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid activity ID"})
+		return
+	}
+
+	activity, err := userService.GetActivityByID(id) // userService must be defined and initialized
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, activity)
+}
+
+/*
+descomentar cuando se implemente en services
+func GetAllActivities(ctx *gin.Context) {
+    activities, err := services.GetAllActivities()
+    if err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    ctx.JSON(http.StatusOK, activities)
+}
+*/

@@ -3,7 +3,7 @@ package domain
 type ActDeportiva struct {
 	ID_actividad int
 	Nombre       string
-	Profesor     int
+	Profesor     string
 	Id_usuario   int
 	Cupos        int
 	Id_categoria int
@@ -18,14 +18,4 @@ type Token struct {
 	Id_token int
 	Activo   bool
 	Token    string
-}
-
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	UserID int    `json:"user_id"`
-	Token  string `json:"token"`
 }

@@ -2,23 +2,21 @@ package main
 
 import (
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/controllers"
-	"proyecto2025-Cuello-Kipran-Chihadehh/backend/domain"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
-func mostrar(user domain.Usuario) {
-	println(user.ID_usuario, "\n",
-		user.ID_usuario,
-		"\n",
-		user.Contraseña)
-	return
-}
 func main() {
-	var usuario1 = domain.Usuario{
-		ID_usuario: 1,
-		Username:   "ismael",
-		Contraseña: "12345678",
-		Is_admin:   false,
-	}
-	var user = controllers.RegisterUser(usuario1)
-	mostrar(user)
+	router := gin.Default()
+	router.Use(cors.Default())
+
+	//router.GET("/actividades", controllers.GetAllActivities)
+	router.GET("/actividad/:id", controllers.GetActivityByID)
+	//router.POST("/inscripcion", controllers.Inscribirse)
+	//router.GET("/misActividades/:userId", controllers.MisActividades)
+
+	router.POST("/login", controllers.Login)
+
+	router.Run(":8080")
 }
