@@ -1,6 +1,6 @@
 package domain
 
-type ActDeportiva struct {
+type Activity struct {
 	ID_actividad int
 	Nombre       string
 	Profesor     string

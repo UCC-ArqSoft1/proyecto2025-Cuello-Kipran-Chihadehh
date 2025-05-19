@@ -1,14 +1,16 @@
 package services
 
+/*
 import (
 	"fmt"
 
-	"proyecto2025-Cuello-Kipran-Chihadehh/backend/clients"
+	"proyecto2025-Cuello-Kipran-Chihadehh/backend/dao"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/utils"
 )
 
-func Login(username string, password string) (int, string, error) {
-	userDAO, err := clients.NewMysqlClient().GetUserByUsername(username)
+
+func (s *UserService) Login(username string, password string) (int, string, error) {
+	userDAO, err := s.UserClient.GetUserByUsername(username)
 	if err != nil {
 		return 0, "", fmt.Errorf("error getting user: %w", err)
 	}
@@ -21,3 +23,4 @@ func Login(username string, password string) (int, string, error) {
 	}
 	return userDAO.ID_usuario, token, nil
 }
+*/

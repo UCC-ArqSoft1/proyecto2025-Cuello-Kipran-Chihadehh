@@ -6,7 +6,7 @@ type Inscripcion struct {
 	Usuario   Usuario `gorm:"foreignkey:UsuarioId"`
 	UsuarioId int
 
-	ActDeportiva ActDeportiva `gorm:"foreignkey:ActividadId"`
+	ActDeportiva Activity `gorm:"foreignkey:ActividadId"`
 	ActividadId  int
 }
 

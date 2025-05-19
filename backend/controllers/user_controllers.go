@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/domain"
 
@@ -38,4 +40,19 @@ func (c *UserController) Login(ctx *gin.Context) {
 		UserID: userID,
 		Token:  token,
 	})
+}
+
+func RegisterUser(u domain.Usuario) domain.Usuario {
+	// Hashear contraseña
+	hash := sha256.New()
+	hash.Write([]byte(u.Contraseña))
+	u.Contraseña = hex.EncodeToString(hash.Sum(nil))
+
+	// Asignar ID simulado
+	u.ID_usuario = len(usuarios) + 1
+
+	// Guardar en lista
+	usuarios = append(usuarios, u)
+
+	return u
 }

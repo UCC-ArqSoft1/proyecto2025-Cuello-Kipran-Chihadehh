@@ -3,7 +3,9 @@ package clients
 import (
 	"fmt"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/dao"
+	"proyecto2025-Cuello-Kipran-Chihadehh/backend/domain"
 
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -50,16 +52,18 @@ func NewMysqlClient() *MysqlClient {
 	}
 }
 
+var Db *gorm.DB
+
 type UserClient interface {
-	GetUserByUsername(username string) (dao.User, error)
-	GetUserByID(userID int) (dao.User, error)
-	CreateUser(user dao.User) (dao.User, error)
 	GetAllActivities() ([]dao.Activity, error)
 	GetActivityByID(activityID int) (dao.Activity, error)
 	SearchActivities(query string) ([]dao.Activity, error)
 	CreateActivity(activity dao.Activity) (dao.Activity, error)
 	UpdateActivity(activityID int, updatedActivity dao.Activity) (dao.Activity, error)
 	DeleteActivity(activityID int) error
+	GetUserByUsername(username string) (dao.User, error)
+	GetUserByID(userID int) (dao.User, error)
+	CreateUser(user dao.User) (dao.User, error)
 	GetAllCategories() ([]dao.Category, error)
 	CreateCategory(category dao.Category) (dao.Category, error)
 	GetAllTimeSlots() ([]dao.TimeSlot, error)
@@ -113,7 +117,16 @@ func (c *MysqlClient) GetAllActivities() ([]dao.Activity, error) {
 
 	return activities, nil
 }
+func InsertActividad(actividad domain.Activity) domain.Activity {
+	result := Db.Create(&actividad)
 
+	if result.Error != nil {
+		log.Println("Error creating actividad:", result.Error)
+		log.Error("")
+	}
+	log.Debug("Actividad Created: ", actividad.ID_actividad)
+	return actividad
+}
 func (c *MysqlClient) GetActivityByID(activityID int) (dao.Activity, error) {
 	var activity dao.Activity
 	// Preload las relaciones necesarias

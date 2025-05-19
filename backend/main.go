@@ -13,10 +13,11 @@ func main() {
 
 	//router.GET("/actividades", controllers.GetAllActivities)
 	router.GET("/actividad/:id", controllers.GetActivityByID)
+	router.POST("/actividad", controllers.ActividadInsert)
 	//router.POST("/inscripcion", controllers.Inscribirse)
 	//router.GET("/misActividades/:userId", controllers.MisActividades)
 
-	router.POST("/login", controllers.Login)
+	//router.POST("/login", controllers.Login)
 
 	router.Run(":8080")
 }
