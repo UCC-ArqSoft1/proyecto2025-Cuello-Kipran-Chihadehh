@@ -12,7 +12,7 @@ import (
 )
 
 var usuarios []domain.Usuario // Simula una "base de datos" temporal
-var userService *services.UserService
+var userService *services.ActService
 
 /*
 	func Login(ctx *gin.Context) {
@@ -72,13 +72,11 @@ func ActividadInsert(c *gin.Context) {
 	c.JSON(http.StatusCreated, actividadDto)
 }
 
-/*
 func GetAllActivities(ctx *gin.Context) {
-    activities, err := services.GetAllActivities()
-    if err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    ctx.JSON(http.StatusOK, activities)
+	activities, err := userService.GetAllActivities()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, activities)
 }
-*/

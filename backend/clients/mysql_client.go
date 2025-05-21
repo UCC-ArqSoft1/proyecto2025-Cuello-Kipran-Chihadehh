@@ -26,9 +26,7 @@ func NewMysqlClient() *MysqlClient {
 	// Migrar todas las tablas en el orden correcto (respetando foreign keys)
 	tables := []interface{}{
 		&dao.User{},        // Primero usuarios (no tiene dependencias)
-		&dao.Category{},    // Luego categorías (no tiene dependencias)
-		&dao.TimeSlot{},    // Luego horarios (no tiene dependencias)
-		&dao.Activity{},    // Actividades (depende de User, Category, TimeSlot)
+		&dao.Activity{},    // Actividades
 		&dao.Inscription{}, // Finalmente inscripciones (depende de User y Activity)
 	}
 
@@ -64,10 +62,6 @@ type UserClient interface {
 	GetUserByUsername(username string) (dao.User, error)
 	GetUserByID(userID int) (dao.User, error)
 	CreateUser(user dao.User) (dao.User, error)
-	GetAllCategories() ([]dao.Category, error)
-	CreateCategory(category dao.Category) (dao.Category, error)
-	GetAllTimeSlots() ([]dao.TimeSlot, error)
-	CreateTimeSlot(timeSlot dao.TimeSlot) (dao.TimeSlot, error)
 	CreateInscription(inscription dao.Inscription) (dao.Inscription, error)
 	GetUserInscriptions(userID int) ([]dao.Inscription, error)
 	CancelInscription(inscriptionID int, userID int) error
@@ -186,50 +180,6 @@ func (c *MysqlClient) DeleteActivity(activityID int) error {
 	}
 
 	return nil
-}
-
-// ===== MÉTODOS PARA CATEGORÍAS =====
-
-func (c *MysqlClient) GetAllCategories() ([]dao.Category, error) {
-	var categories []dao.Category
-
-	err := c.DB.Find(&categories).Error
-	if err != nil {
-		return nil, fmt.Errorf("error getting all categories: %w", err)
-	}
-
-	return categories, nil
-}
-
-func (c *MysqlClient) CreateCategory(category dao.Category) (dao.Category, error) {
-	err := c.DB.Create(&category).Error
-	if err != nil {
-		return dao.Category{}, fmt.Errorf("error creating category: %w", err)
-	}
-
-	return category, nil
-}
-
-// ===== MÉTODOS PARA HORARIOS =====
-
-func (c *MysqlClient) GetAllTimeSlots() ([]dao.TimeSlot, error) {
-	var timeSlots []dao.TimeSlot
-
-	err := c.DB.Find(&timeSlots).Error
-	if err != nil {
-		return nil, fmt.Errorf("error getting all time slots: %w", err)
-	}
-
-	return timeSlots, nil
-}
-
-func (c *MysqlClient) CreateTimeSlot(timeSlot dao.TimeSlot) (dao.TimeSlot, error) {
-	err := c.DB.Create(&timeSlot).Error
-	if err != nil {
-		return dao.TimeSlot{}, fmt.Errorf("error creating time slot: %w", err)
-	}
-
-	return timeSlot, nil
 }
 
 // ===== MÉTODOS PARA INSCRIPCIONES =====

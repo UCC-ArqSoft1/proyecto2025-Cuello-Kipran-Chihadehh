@@ -4,55 +4,64 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
+	"proyecto2025-Cuello-Kipran-Chihadehh/backend/dao"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/domain"
+	"proyecto2025-Cuello-Kipran-Chihadehh/backend/services"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserService interface {
-	Login(username string, password string) (int, string, error)
-}
-
-type UserController struct {
-	UserService UserService
-}
-
-func NewUserController(userService UserService) *UserController {
-	return &UserController{
-		UserService: userService,
+func CreateUser(ctx *gin.Context) {
+	var user dao.User
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
-}
 
-func (c *UserController) Login(ctx *gin.Context) {
+	// Hash the password
+	hash := sha256.New()
+	hash.Write([]byte(user.PasswordHash))
+	user.PasswordHash = hex.EncodeToString(hash.Sum(nil))
+
+	userService := services.UserService{}
+	createdUser, err := userService.CreateUser(user)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, createdUser)
+}
+func Login(ctx *gin.Context) {
 	var request domain.LoginRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userID, token, err := c.UserService.Login(request.Username, request.Password)
+	userService := services.UserService{}
+	userID, token, err, IsAdmin := userService.Login(request.Username, request.Password)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, domain.LoginResponse{
-		UserID: userID,
-		Token:  token,
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Login exitoso",
+		"usuario": userID,
+		"token":   token, // en el paso 3 lo agregamos
+		"isAdmin": IsAdmin,
 	})
 }
 
-func RegisterUser(u domain.Usuario) domain.Usuario {
-	// Hashear contraseña
-	hash := sha256.New()
-	hash.Write([]byte(u.Contraseña))
-	u.Contraseña = hex.EncodeToString(hash.Sum(nil))
+func GetUserByUsername(ctx *gin.Context) {
+	username := ctx.Param("username")
+	userService := services.UserService{}
+	user, err := userService.GetUserByUsername(username)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
 
-	// Asignar ID simulado
-	u.ID_usuario = len(usuarios) + 1
-
-	// Guardar en lista
-	usuarios = append(usuarios, u)
-
-	return u
+	ctx.JSON(http.StatusOK, user)
 }

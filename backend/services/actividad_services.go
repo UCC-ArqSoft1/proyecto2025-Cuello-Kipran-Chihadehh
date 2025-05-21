@@ -10,35 +10,43 @@ import (
 
 var Db *gorm.DB
 
-// Define the UserClient interface with the required methods
-type UserClient interface {
+// Define the ActClient interface with the required methods
+type ActClient interface {
 	GetActivityByID(activityID int) (dao.Activity, error)
 	InsertActividad(actividad domain.Activity) (dao.Activity, error)
-
+	GetAllActivities() ([]dao.Activity, error)
 	// Add other methods as needed
 }
 
-type UserService struct {
-	UserClient UserClient
+type ActService struct {
+	ActClient ActClient
 }
 
-func NewUserService(userClient UserClient) *UserService {
-	return &UserService{
-		UserClient: userClient,
+func NewActService(ActClient ActClient) *ActService {
+	return &ActService{
+		ActClient: ActClient,
 	}
 }
 
-func (s *UserService) GetActivityByID(activityID int) (dao.Activity, error) {
+func (s *ActService) GetActivityByID(activityID int) (dao.Activity, error) {
 
-	activity, err := s.UserClient.GetActivityByID(activityID)
+	activity, err := s.ActClient.GetActivityByID(activityID)
 	if err != nil {
 		return dao.Activity{}, fmt.Errorf("error getting activity: %w", err)
 	}
 
 	return activity, nil
 }
+func (s *ActService) GetAllActivities() ([]dao.Activity, error) {
+	activities, err := s.ActClient.GetAllActivities()
+	if err != nil {
+		return nil, fmt.Errorf("error getting all activities: %w", err)
+	}
 
-func (s UserService) InsertActividad(actividadDto dao.Activity) (dao.Activity, error) {
+	return activities, nil
+}
+
+func (s ActService) InsertActividad(actividadDto dao.Activity) (dao.Activity, error) {
 
 	var actividad domain.Activity
 
@@ -49,10 +57,9 @@ func (s UserService) InsertActividad(actividadDto dao.Activity) (dao.Activity, e
 	actividad.Hora_inicio = actividadDto.Hora_inicio
 	actividad.Duracion = actividadDto.Duracion
 	actividad.Profesor = actividadDto.Profesor
-	actividad.Id_usuario = actividadDto.Id_usuario
-	actividad.Id_categoria = actividadDto.Id_categoria
+	actividad.Categoria = actividadDto.Categoria
 
-	insertedActividad, err := s.UserClient.InsertActividad(actividad)
+	insertedActividad, err := s.ActClient.InsertActividad(actividad)
 	if err != nil {
 		return dao.Activity{}, fmt.Errorf("error inserting actividad: %w", err)
 	}
