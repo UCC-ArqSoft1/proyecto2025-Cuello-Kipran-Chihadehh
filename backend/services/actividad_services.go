@@ -46,16 +46,16 @@ func (s *ActService) GetAllActivities() ([]dao.Activity, error) {
 	return activities, nil
 }
 
-func (s ActService) InsertActividad(actividadDto dao.Activity) (dao.Activity, error) {
+func (s ActService) InsertActividad(actividadDto dao.Activity, timeslotDto dao.TimeSlot) (dao.Activity, error) {
 
 	var actividad domain.Activity
 
 	actividad.Nombre = actividadDto.Nombre
 	actividad.Descripcion = actividadDto.Descripcion
 	actividad.Cupos = actividadDto.Cupos
-	actividad.Fecha = actividadDto.Fecha
-	actividad.Hora_inicio = actividadDto.Hora_inicio
-	actividad.Duracion = actividadDto.Duracion
+	actividad.ID_timeslot.Dia = actividadDto.ID_timeslot.Dia
+	actividad.ID_timeslot.Hora_inicio = actividadDto.ID_timeslot.Hora_inicio
+	actividad.ID_timeslot.Hora_fin = actividadDto.ID_timeslot.Hora_fin
 	actividad.Profesor = actividadDto.Profesor
 	actividad.Categoria = actividadDto.Categoria
 

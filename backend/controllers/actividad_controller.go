@@ -14,26 +14,6 @@ import (
 var usuarios []domain.Usuario // Simula una "base de datos" temporal
 var userService *services.ActService
 
-/*
-	func Login(ctx *gin.Context) {
-		var request domain.LoginRequest
-		if err := ctx.ShouldBindJSON(&request); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		userID, token, err := services.Login(request.Username, request.Password)
-		if err != nil {
-			ctx.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, gin.H{
-			"user_id": userID,
-			"token":   token,
-		})
-	}
-*/
 func GetActivityByID(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -53,6 +33,7 @@ func GetActivityByID(ctx *gin.Context) {
 
 func ActividadInsert(c *gin.Context) {
 	var actividadDto dao.Activity
+	var timeslotDto dao.TimeSlot
 	err := c.BindJSON(&actividadDto)
 
 	// Error Parsing json param
@@ -62,7 +43,7 @@ func ActividadInsert(c *gin.Context) {
 		return
 	}
 
-	actividadDto, er := userService.InsertActividad(actividadDto)
+	actividadDto, er := userService.InsertActividad(actividadDto, timeslotDto)
 	// Error del Insert
 	if er != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": er.Error()})
