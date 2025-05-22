@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/dao"
 	"proyecto2025-Cuello-Kipran-Chihadehh/backend/domain"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
@@ -98,10 +99,18 @@ func init() {
 		Profesor:     "Juan Perez",
 		Cupos:        20,
 		Categoria:    "Bienestar",
-		Fecha:        "2023-10-01",
-		Hora_inicio:  "10:00",
-		Duracion:     "01:00",
+		ID_timeslot:  dao.TimeSlot{ID_horario: 1},
 	})
+	Db.AutoMigrate(&dao.TimeSlot{})
+	horaInicio, _ := time.Parse("15:04:05", "08:00:00")
+	horaFin, _ := time.Parse("15:04:05", "09:30:00")
+	Db.Create(&dao.TimeSlot{
+		ID_horario:  1,
+		Dia:         "Lunes",
+		Hora_inicio: horaInicio,
+		Hora_fin:    horaFin,
+	})
+
 	Db.AutoMigrate(&dao.Inscription{})
 	Db.Create(&dao.Inscription{
 		ID_inscripcion: 1,
