@@ -67,6 +67,50 @@ type UserClient interface {
 	CancelInscription(inscriptionID int, userID int) error
 }
 
+func init() {
+	user := "root"
+	password := "Base041104"
+	host := "localhost"
+	port := 3306
+	database := "backend"
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true&charset=utf8mb4&loc=Local",
+		user, password, host, port, database)
+
+	var err error
+	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(fmt.Sprintf("error connecting to DB: %v", err))
+	}
+	Db.AutoMigrate(&dao.User{})
+	Db.Create(&dao.User{
+		ID_usuario:   1,
+		Username:     "emiliano",
+		PasswordHash: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+		Is_admin:     true,
+	})
+
+	Db.AutoMigrate(&dao.Activity{})
+	Db.Create(&dao.Activity{
+		ID_actividad: 1,
+		Nombre:       "Yoga",
+		Descripcion:  "Clase de yoga para principiantes",
+		Profesor:     "Juan Perez",
+		Cupos:        20,
+		Categoria:    "Bienestar",
+		Fecha:        "2023-10-01",
+		Hora_inicio:  "10:00",
+		Duracion:     "01:00",
+	})
+	Db.AutoMigrate(&dao.Inscription{})
+	Db.Create(&dao.Inscription{
+		ID_inscripcion: 1,
+		Estado:         "activa",
+		ID_usuario:     1,
+		ID_actividad:   1,
+	})
+}
+
 // ===== MÉTODOS PARA USUARIOS =====
 
 func (c *MysqlClient) GetUserByUsername(username string) (dao.User, error) {

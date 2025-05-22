@@ -36,6 +36,13 @@ func (s *UserService) CreateUser(user dao.User) (dao.User, error) {
 	}
 	return userDAO, nil
 }
+func (s *UserService) GenerateJWT(userID int) (string, error) {
+	token, err := utils.GenerateJWT(userID)
+	if err != nil {
+		return "", fmt.Errorf("error generating token: %w", err)
+	}
+	return token, nil
+}
 
 func (s *UserService) Login(username string, password string) (int, string, error, bool) {
 	userDAO, err := s.UserClient.GetUserByUsername(username)
