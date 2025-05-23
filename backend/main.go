@@ -1,37 +1,42 @@
 package main
 
 import (
-	"proyecto2025-Cuello-Kipran-Chihadehh/backend/controllers"
-	"time"
+	"backend/controllers"
+	"backend/services"
+	"backend/utils"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// Initialize the Gin router
 	router := gin.Default()
-	router.Use(cors.Default())
-
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-	//router.GET("/actividades", controllers.GetAllActivities)
-	router.GET("/actividad/:id", controllers.GetActivityByID)
-	router.GET("/actividades", controllers.GetAllActivities)
-	router.GET("/usuario/:username", controllers.GetUserByUsername)
-	router.POST("/actividad", controllers.ActividadInsert)
-	router.POST("/usuario", controllers.CreateUser)
+	// Set up CORS middleware
+	router.Use(utils.CORS)
+	// Set up routes
 	router.POST("/login", controllers.Login)
-	//router.POST("/RegistrarUsuario", controllers.RegisterUser)
+	router.POST("/register", controllers.Register)
+	router.GET("/activities", controllers.GetActivities)
+	router.GET("/activities/:id", controllers.GetActivityByID)
+	router.POST("/activities", controllers.CreateActivity)
+	router.PUT("/activities/:id", controllers.UpdateActivity)
+	router.DELETE("/activities/:id", controllers.DeleteActivity)
+	router.GET("/activities/category/:categoria", controllers.GetActivitiesByCategory)
+	router.GET("/activities/profesor/:profesor", controllers.GetActivitiesByProfesor)
+	router.GET("/activities/day/:dia", controllers.GetActivitiesByDay)
+	router.GET("/activities/available", controllers.GetActivitiesWithAvailableSlots)
+	router.GET("/activities/search", controllers.SearchActivitiesByName)
+	router.PUT("/activities/:id/slots", controllers.UpdateActivitySlots)
+	router.GET("/users", controllers.GetAllUsers)
+	router.GET("/users/:id", controllers.GetUserByID)
+	router.PUT("/users/:id", controllers.UpdateUser)
+	router.DELETE("/users/:id", controllers.DeleteUser)
+	router.POST("/users/login", controllers.Login)
+	router.POST("/users/register", controllers.Register)
+	// Initialize the database connection
+	if err := services.InitializeDB(); err != nil {
+		panic("Failed to connect to the database: " + err.Error())
+	}
 
-	//router.POST("/inscripcion", controllers.Inscribirse)
-	//router.GET("/misActividades/:userId", controllers.MisActividades)
-	//router.POST("/login", controllers.Login)
-
-	router.Run(":8080")
+	router.Run()
 }

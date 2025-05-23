@@ -1,60 +1,157 @@
 package services
 
 import (
+	"backend/clients"
+	"backend/dao"
+	"backend/domain"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
-
-	"proyecto2025-Cuello-Kipran-Chihadehh/backend/dao"
-	"proyecto2025-Cuello-Kipran-Chihadehh/backend/utils"
 )
 
-type UserClient interface {
-	GetUserByUsername(username string) (dao.User, error)
-	GetUserByID(userID int) (dao.User, error)
-	CreateUser(user dao.User) (dao.User, error)
+// GetUserByID obtiene un usuario por ID y lo convierte al formato domain
+func GetUserByID(id int) (domain.User, error) {
+	userDao, err := clients.GetUserByID(id)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("user not found with id %d: %w", id, err)
+	}
+
+	return domain.User{
+		ID:       userDao.ID,
+		Username: userDao.Username,
+		Password: "", // No devolvemos la contraseña hasheada
+		IsAdmin:  userDao.IsAdmin,
+	}, nil
 }
 
-type UserService struct {
-	UserClient UserClient
+// GetUserByUsername obtiene un usuario por username
+func GetUserByUsername(username string) (domain.User, error) {
+	userDao, err := clients.GetUserByUsername(username)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("user not found with username %s: %w", username, err)
+	}
+
+	return domain.User{
+		ID:       userDao.ID,
+		Username: userDao.Username,
+		Password: "", // No devolvemos la contraseña hasheada
+		IsAdmin:  userDao.IsAdmin,
+	}, nil
 }
 
-func NewUserService(userClient UserClient) *UserService {
-	return &UserService{
-		UserClient: userClient,
+// CreateUser crea un nuevo usuario con contraseña hasheada
+func CreateUser(user domain.User) (domain.User, error) {
+	// Validaciones básicas
+	if user.Username == "" {
+		return domain.User{}, errors.New("username cannot be empty")
 	}
-}
-func (s *UserService) GetUserByUsername(username string) (dao.User, error) {
-	userDAO, err := s.UserClient.GetUserByUsername(username)
+	if user.Password == "" {
+		return domain.User{}, errors.New("password cannot be empty")
+	}
+
+	// Verificar si el usuario ya existe
+	_, err := clients.GetUserByUsername(user.Username)
+	if err == nil {
+		return domain.User{}, errors.New("username already exists")
+	}
+
+	// Hashear la contraseña
+	hashedPassword := hashPassword(user.Password)
+
+	// Crear el DAO object
+	userDao := dao.User{
+		Username:     user.Username,
+		PasswordHash: hashedPassword,
+		IsAdmin:      user.IsAdmin,
+	}
+
+	// Guardar en la base de datos
+	createdUser, err := clients.CreateUser(userDao)
 	if err != nil {
-		return dao.User{}, fmt.Errorf("error getting user: %w", err)
+		return domain.User{}, fmt.Errorf("failed to create user: %w", err)
 	}
-	return userDAO, nil
-}
-func (s *UserService) CreateUser(user dao.User) (dao.User, error) {
-	userDAO, err := s.UserClient.CreateUser(user)
-	if err != nil {
-		return dao.User{}, fmt.Errorf("error creating user: %w", err)
-	}
-	return userDAO, nil
-}
-func (s *UserService) GenerateJWT(userID int) (string, error) {
-	token, err := utils.GenerateJWT(userID)
-	if err != nil {
-		return "", fmt.Errorf("error generating token: %w", err)
-	}
-	return token, nil
+
+	return domain.User{
+		ID:       createdUser.ID,
+		Username: createdUser.Username,
+		Password: "", // No devolvemos la contraseña
+		IsAdmin:  createdUser.IsAdmin,
+	}, nil
 }
 
-func (s *UserService) Login(username string, password string) (int, string, error, bool) {
-	userDAO, err := s.UserClient.GetUserByUsername(username)
+// ValidateUserCredentials valida las credenciales de un usuario para login
+func ValidateUserCredentials(username, password string) (domain.User, error) {
+	userDao, err := clients.GetUserByUsername(username)
 	if err != nil {
-		return 0, "", fmt.Errorf("error getting user: %w", err), false
+		return domain.User{}, errors.New("invalid credentials")
 	}
-	if utils.HashSHA256(password) != userDAO.PasswordHash {
-		return 0, "", fmt.Errorf("invalid password"), false
+
+	// Verificar la contraseña
+	if !verifyPassword(password, userDao.PasswordHash) {
+		return domain.User{}, errors.New("invalid credentials")
 	}
-	token, err := utils.GenerateJWT(userDAO.ID_usuario)
+
+	return domain.User{
+		ID:       userDao.ID,
+		Username: userDao.Username,
+		Password: "", // No devolvemos la contraseña
+		IsAdmin:  userDao.IsAdmin,
+	}, nil
+}
+
+// GetAllUsers obtiene todos los usuarios (solo para admins)
+func GetAllUsers() ([]domain.User, error) {
+	usersDao, err := clients.GetAllUsers()
 	if err != nil {
-		return 0, "", fmt.Errorf("error generating token: %w", err), false
+		return nil, fmt.Errorf("failed to get users: %w", err)
 	}
-	return userDAO.ID_usuario, token, nil, userDAO.Is_admin
+
+	var users []domain.User
+	for _, userDao := range usersDao {
+		users = append(users, domain.User{
+			ID:       userDao.ID,
+			Username: userDao.Username,
+			Password: "", // No devolvemos la contraseña
+			IsAdmin:  userDao.IsAdmin,
+		})
+	}
+
+	return users, nil
+}
+
+// UpdateUser actualiza un usuario existente
+func UpdateUser(user domain.User) error {
+	// Obtener el usuario actual de la base de datos
+	currentUser, err := clients.GetUserByID(user.ID)
+	if err != nil {
+		return fmt.Errorf("user not found: %w", err)
+	}
+
+	// Actualizar solo los campos que no están vacíos
+	if user.Username != "" {
+		currentUser.Username = user.Username
+	}
+	if user.Password != "" {
+		currentUser.PasswordHash = hashPassword(user.Password)
+	}
+	currentUser.IsAdmin = user.IsAdmin
+
+	return clients.UpdateUser(currentUser)
+}
+
+// DeleteUser elimina un usuario
+func DeleteUser(id int) error {
+	return clients.DeleteUser(id)
+}
+
+// hashPassword hashea una contraseña usando SHA256
+func hashPassword(password string) string {
+	hash := sha256.Sum256([]byte(password))
+	return hex.EncodeToString(hash[:])
+}
+
+// verifyPassword verifica si una contraseña coincide con su hash
+func verifyPassword(password, hash string) bool {
+	return hashPassword(password) == hash
 }

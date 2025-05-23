@@ -1,8 +1,8 @@
 package domain
 
-type Usuario struct {
-	ID_usuario int    `gorm:"primary_key"`
-	Username   string `gorm:"type:varchar(250);not null"`
-	Contraseña string `gorm:"type:varchar(250);not null"`
-	Is_admin   bool
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	IsAdmin  bool   `json:"is_admin"`
 }

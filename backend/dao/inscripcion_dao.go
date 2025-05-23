@@ -17,7 +17,7 @@ type Inscription struct {
 	ID_actividad int `gorm:"not null" json:"id_actividad"`
 
 	// Relaciones
-	Usuario   User     `gorm:"foreignKey:ID_usuario;constraint:OnDelete:CASCADE" json:"-"`
+	Usuario   User     `gorm:"foreignKey:ID_usuario;constraint:OnDelete:CASCADE"`
 	Actividad Activity `gorm:"foreignKey:ID_actividad;constraint:OnDelete:CASCADE" json:"actividad"`
 
 	// Índice compuesto para evitar inscripciones duplicadas
