@@ -2,7 +2,7 @@ package dao
 
 type Activity struct {
 	ID_actividad int    `gorm:"primary_key;auto_increment"` // Cambiado para MySQL
-	Nombre       string `gorm:"unique;not null;size:100"`
+	Nombre       string `gorm:"not null;size:100"`
 	Profesor     string `gorm:"not null;size:100"`  // Nombre del profesor
 	Cupos        int    `gorm:"not null;default:1"` // Cupos disponibles
 	Categoria    string `gorm:"not null;size:100"`  // Categoría de la actividad
