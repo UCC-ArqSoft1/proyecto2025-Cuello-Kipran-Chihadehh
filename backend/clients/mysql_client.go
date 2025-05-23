@@ -18,27 +18,42 @@ type MysqlClient struct {
 
 func NewMysqlClient() *MysqlClient {
 	dsnFormat := "%s:%s@tcp(%s:%d)/%s?parseTime=true&charset=utf8mb4&loc=Local"
-	dsn := fmt.Sprintf(dsnFormat, "root", "root", "127.0.0.1", 3306, "backend")
+	dsn := fmt.Sprintf(dsnFormat, "root", "Dinorex-2705", "127.0.0.1", 3306, "gym-db")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(fmt.Errorf("failed to connect to database: %v", err))
 	}
 
-	// Migrar todas las tablas en el orden correcto (respetando foreign keys)
+	// IMPORTANTE: Asignar la conexión a la variable global DB ANTES de hacer migraciones
+	DB = db
 
-	DB.AutoMigrate(&dao.User{})
-	DB.AutoMigrate(&dao.Activity{})
-	DB.AutoMigrate(&dao.Inscription{})
+	// Migrar todas las tablas en el orden correcto (respetando foreign keys)
+	err = DB.AutoMigrate(&dao.User{})
+	if err != nil {
+		panic(fmt.Errorf("failed to migrate User table: %v", err))
+	}
+
+	err = DB.AutoMigrate(&dao.Activity{})
+	if err != nil {
+		panic(fmt.Errorf("failed to migrate Activity table: %v", err))
+	}
+
+	err = DB.AutoMigrate(&dao.Inscription{})
+	if err != nil {
+		panic(fmt.Errorf("failed to migrate Inscription table: %v", err))
+	}
 
 	// Crear índices adicionales si es necesario
-	err = db.Exec(`
+	err = DB.Exec(`
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_user_activity 
 		ON inscriptions (ID_usuario, ID_actividad)
 	`).Error
 	if err != nil {
 		fmt.Printf("Warning: Could not create unique index: %v\n", err)
 	}
+
+	fmt.Println("Database migration completed successfully")
 
 	return &MysqlClient{
 		DB: db,
