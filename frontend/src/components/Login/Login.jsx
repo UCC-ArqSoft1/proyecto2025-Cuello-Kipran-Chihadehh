@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
 import './Login.css'
 
 const Login = () => {
@@ -9,7 +8,6 @@ const Login = () => {
         password: ''
     })
     const { login, error: authError, loading } = useAuth()
-    const navigate = useNavigate()
 
     const handleInputChange = (e) => {
         const { name, value } = e.target
@@ -21,14 +19,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        try {
-            const success = await login(formData.username, formData.password)
-            if (success) {
-                navigate('/dashboard')
-            }
-        } catch (error) {
-            console.error('Login error:', error)
-        }
+        await login(formData.username, formData.password)
     }
 
     return (
@@ -79,7 +70,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="login-button"
+                            className={`login-button ${loading ? 'loading' : ''}`}
                         >
                             {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                         </button>
