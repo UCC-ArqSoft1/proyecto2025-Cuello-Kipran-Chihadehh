@@ -1,84 +1,60 @@
-import { useState } from 'react'
-import { useAuth } from '../../context/AuthContext'
-import './Login.css'
+// Login.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Login.css";
 
 const Login = () => {
-    const [formData, setFormData] = useState({
-        username: '',
-        password: ''
-    })
-    const { login, error: authError, loading } = useAuth()
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }))
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:8080/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) throw new Error("Login failed");
+      const data = await response.json();
+      document.cookie = `token=${data.token}; path=/; SameSite=Strict`;
+
+      navigate("/activities");
+    } catch {
+      setError("Credenciales incorrectas");
     }
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        await login(formData.username, formData.password)
-    }
+  return (
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleLogin}>
+        <h2>Iniciar Sesión</h2>
+        {error && <div className="error">{error}</div>}
+        <input
+          type="text"
+          placeholder="Usuario"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
+  );
+};
 
-    return (
-        <div className="login-container">
-            <div className="login-wrapper">
-                <div className="login-card">
-                    <div className="login-header">
-                        <h2 className="login-title">Bienvenido</h2>
-                        <p className="login-subtitle">Inicia sesión en tu cuenta</p>
-                        {authError && <div className="error-message">{authError}</div>}
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="login-form">
-                        <div className="form-group">
-                            <label htmlFor="username" className="form-label">
-                                Usuario
-                            </label>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleInputChange}
-                                className="form-input"
-                                placeholder="admin"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="password" className="form-label">
-                                Contraseña
-                            </label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                className="form-input"
-                                placeholder="admin123"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={`login-button ${loading ? 'loading' : ''}`}
-                        >
-                            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-export default Login
+export default Login;

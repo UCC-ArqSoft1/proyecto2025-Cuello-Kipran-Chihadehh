@@ -3,9 +3,10 @@ package main
 import (
 	"backend/clients"
 	"backend/controllers"
-	"backend/utils"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,8 +26,15 @@ func main() {
 	// ========================================
 	router := gin.Default()
 
-	// Set up CORS middleware
-	router.Use(utils.CORS)
+	// Set up CORS middleware directamente aquí, para permitir tu frontend React
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"}, // Cambia si frontend corre en otro origen
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// ========================================
 	// 3. CONFIGURAR RUTAS
@@ -41,6 +49,9 @@ func main() {
 	router.GET("/users/:id", controllers.GetUserByID)
 	router.PUT("/users/:id", controllers.UpdateUser)
 	router.DELETE("/users/:id", controllers.DeleteUser)
+	// Eliminar duplicados si quieres:
+	// router.POST("/users/login", controllers.Login)
+	// router.POST("/users/register", controllers.Register)
 
 	// Activity routes
 	router.GET("/activities", controllers.GetActivities)
