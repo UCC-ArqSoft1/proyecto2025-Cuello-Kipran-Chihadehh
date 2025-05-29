@@ -41,8 +41,6 @@ func main() {
 	router.GET("/users/:id", controllers.GetUserByID)
 	router.PUT("/users/:id", controllers.UpdateUser)
 	router.DELETE("/users/:id", controllers.DeleteUser)
-	router.POST("/users/login", controllers.Login)       // Duplicado - considera remover
-	router.POST("/users/register", controllers.Register) // Duplicado - considera remover
 
 	// Activity routes
 	router.GET("/activities", controllers.GetActivities)
