@@ -31,6 +31,7 @@ func GetUserByUsername(username string) (domain.User, error) {
 
 	return domain.User{
 		ID:       userDao.ID,
+		Name:     userDao.Name,
 		Username: userDao.Username,
 		Password: "", // No devolvemos la contraseña hasheada
 		IsAdmin:  userDao.IsAdmin,
