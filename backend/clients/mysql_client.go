@@ -19,10 +19,9 @@ type MysqlClient struct {
 func NewMysqlClient() *MysqlClient {
 	dsnFormat := "%s:%s@tcp(%s:%d)/%s?parseTime=true&charset=utf8mb4&loc=Local"
 	//server isma
-	//dsn := fmt.Sprintf(dsnFormat, "root", "Dinorex-2025", "localhost", 3306, "gym-db")
+	dsn := fmt.Sprintf(dsnFormat, "root", "Dinorex-2705", "127.0.0.1", 3306, "gym")
 	//server lucas
-	dsn := fmt.Sprintf(dsnFormat, "root", "root", "localhost", 3306, "backend")
-	//dsn := fmt.Sprintf(dsnFormat, "root", "franco2510", "localhost", 3306, "backend")
+	//dsn := fmt.Sprintf(dsnFormat, "root", "root", "localhost", 3306, "backend")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -198,4 +197,37 @@ func SearchActivitiesByName(name string) (dao.Activities, error) {
 		return nil, err
 	}
 	return activities, nil
+}
+
+// ================ INSCRIPTION METHODS ================
+
+func CreateInscription(inscription dao.Inscription) (dao.Inscription, error) {
+	if err := DB.Create(&inscription).Error; err != nil {
+		return dao.Inscription{}, err
+	}
+	return inscription, nil
+}
+
+func GetInscriptionByID(id int) (dao.Inscription, error) {
+	var inscription dao.Inscription
+	if err := DB.First(&inscription, id).Error; err != nil {
+		return dao.Inscription{}, err
+	}
+	return inscription, nil
+}
+
+func GetInscriptionByUserAndActivity(userID int, activityID int) (dao.Inscription, error) {
+	var inscription dao.Inscription
+	if err := DB.Where("ID_usuario = ? AND ID_actividad = ?", userID, activityID).First(&inscription).Error; err != nil {
+		return dao.Inscription{}, err
+	}
+	return inscription, nil
+}
+
+func GetAllInscriptions() ([]dao.Inscription, error) {
+	var inscriptions []dao.Inscription
+	if err := DB.Find(&inscriptions).Error; err != nil {
+		return nil, err
+	}
+	return inscriptions, nil
 }
