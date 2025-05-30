@@ -68,6 +68,9 @@ func main() {
 	router.GET("/activities/search", controllers.SearchActivitiesByName)
 	router.PUT("/activities/:id/slots", controllers.UpdateActivitySlots)
 
+	//Inscriptions routes
+	router.GET("/inscription/:id", controllers.GetInscriptionByID)
+	router.POST("/inscription", controllers.CreateInscription)
 	// ========================================
 	// 4. INICIAR SERVIDOR
 	// ========================================
