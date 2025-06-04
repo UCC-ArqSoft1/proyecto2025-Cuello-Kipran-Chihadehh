@@ -1,50 +1,43 @@
+import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
 import Login from './components/Login/Login'
 import PaginaPrincipal from './components/PaginaPrincipal/PaginaPrincipal'
+import ErrorBoundary from './ErrorBoundary/ErrorBoundary'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import UserList from "./components/users/UserList"
 
-// Componente para proteger rutas
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth()
-  return isAuthenticated ? children : <Navigate to="/login" replace />
-}
+  const { isAuthenticated, loading } = useAuth()
 
-// Componente para redirigir usuarios autenticados
-const PublicRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth()
-  return !isAuthenticated ? children : <Navigate to="/" replace />
-}
+  if (loading) {
+    return <div>Cargando...</div>
+  }
 
-// Componente interno de la aplicación con acceso al contexto
-const AppContent = () => {
-  return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <PaginaPrincipal />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
+  return isAuthenticated ? children : <Navigate to="/login" />
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <PaginaPrincipal />
+            </ProtectedRoute>
+          } />
+          <Route path="/activities" element={<Navigate to="/" />} />
+          <Route path="/users" element={
+            <ProtectedRoute>
+              <UserList />
+            </ProtectedRoute>
+          } />
+          {/* Ruta catch-all para páginas no encontradas */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

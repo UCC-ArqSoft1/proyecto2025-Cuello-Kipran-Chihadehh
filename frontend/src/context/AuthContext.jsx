@@ -1,50 +1,70 @@
-import { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext()
+// Crear el contexto
+const AuthContext = createContext();
 
+// Hook personalizado para usar el contexto
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    }
+    return context;
+};
+
+// Proveedor del contexto
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null)
-    const [error, setError] = useState(null)
-    const [loading, setLoading] = useState(false)
+    const [user, setUser] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const login = async (username, password) => {
-        try {
-            setLoading(true)
-            setError(null)
-            // Simulación de API
-            await new Promise(resolve => setTimeout(resolve, 1000))
+    // Verificar si hay un token guardado al cargar la aplicación
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        const savedUser = localStorage.getItem('user');
 
-            // Validación simple (en producción usaría una API real)
-            if (username === 'admin' && password === 'admin123') {
-                setUser({ username })
-                return true // Login exitoso
-            } else {
-                throw new Error('Credenciales incorrectas')
-            }
-        } catch (err) {
-            setError(err.message)
-            return false // Login fallido
-        } finally {
-            setLoading(false)
+        if (token && savedUser) {
+            setUser(JSON.parse(savedUser));
+            setIsAuthenticated(true);
         }
-    }
+        setLoading(false);
+    }, []);
 
+    // Función para iniciar sesión
+    const login = (userData, token) => {
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        setIsAuthenticated(true);
+    };
+
+    // Función para cerrar sesión
     const logout = () => {
-        setUser(null)
-    }
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        setUser(null);
+        setIsAuthenticated(false);
+    };
+
+    // Función para obtener el token
+    const getToken = () => {
+        return localStorage.getItem('authToken');
+    };
+
+    const value = {
+        user,
+        isAuthenticated,
+        loading,
+        login,
+        logout,
+        getToken
+    };
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            error,
-            loading,
-            login,
-            logout,
-            isAuthenticated: !!user
-        }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
-    )
-}
+    );
+};
 
-export const useAuth = () => useContext(AuthContext)
+export default AuthContext;
