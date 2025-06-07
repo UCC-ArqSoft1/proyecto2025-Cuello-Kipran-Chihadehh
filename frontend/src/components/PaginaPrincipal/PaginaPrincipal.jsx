@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useNavigate } from 'react-router-dom' // Importar useNavigate
 import ActivityList from '../Activities/ActivityList'
 import ActivityForm from '../Activities/ActivityForm'
 import './PaginaPrincipal.css'
@@ -8,22 +7,14 @@ import UserList from '../users/UserList'
 
 const PaginaPrincipal = () => {
     const { user, logout, authenticatedFetch } = useAuth()
-    const navigate = useNavigate() // Hook para navegación
     const [activeSection, setActiveSection] = useState('dashboard')
     const [activities, setActivities] = useState([])
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    const handleLogout = async () => {
-        try {
-            await logout() // Ejecutar logout del contexto
-            navigate('/login', { replace: true }) // Redirigir al login
-        } catch (error) {
-            console.error('Error durante el logout:', error)
-            // Incluso si hay error, redirigir al login
-            navigate('/login', { replace: true })
-        }
+    const handleLogout = () => {
+        logout()
     }
 
     const loadActivities = async () => {
@@ -106,13 +97,6 @@ const PaginaPrincipal = () => {
         }
     }
 
-    // Verificar si el usuario está autenticado
-    useEffect(() => {
-        if (!user) {
-            navigate('/login', { replace: true })
-        }
-    }, [user, navigate])
-
     useEffect(() => {
         if (activeSection === 'activities') {
             loadActivities()
@@ -120,11 +104,6 @@ const PaginaPrincipal = () => {
             loadUsers()
         }
     }, [activeSection])
-
-    // Si no hay usuario, no renderizar nada (se redirigirá)
-    if (!user) {
-        return <div className="loading">Cargando...</div>
-    }
 
     const renderContent = () => {
         if (loading) {
