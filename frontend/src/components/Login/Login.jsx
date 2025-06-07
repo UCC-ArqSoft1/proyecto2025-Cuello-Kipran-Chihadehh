@@ -26,7 +26,7 @@ const Login = () => {
       const data = await response.json();
       document.cookie = `token=${data.token}; path=/; SameSite=Strict`;
 
-      navigate("/activities");
+      navigate("/paginaprincipal");
     } catch {
       setError("Credenciales incorrectas");
     }

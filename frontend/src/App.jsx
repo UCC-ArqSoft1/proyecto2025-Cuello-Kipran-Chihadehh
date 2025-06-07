@@ -33,6 +33,7 @@ function App() {
               <UserList />
             </ProtectedRoute>
           } />
+          <Route path='/paginaprincipal' element={<PaginaPrincipal />} />
           {/* Ruta catch-all para páginas no encontradas */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
