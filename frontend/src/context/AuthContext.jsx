@@ -40,11 +40,11 @@ export const AuthProvider = ({ children }) => {
 
     // Función para cerrar sesión
     const logout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        setUser(null);
-        setIsAuthenticated(false);
-    };
+        setUser(null)
+        setToken(null)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+    }
 
     // Función para obtener el token
     const getToken = () => {

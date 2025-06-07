@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router-dom' // Importar useNavigate
 import ActivityList from '../Activities/ActivityList'
 import ActivityForm from '../Activities/ActivityForm'
 import './PaginaPrincipal.css'
 import UserList from '../users/UserList'
+
 const PaginaPrincipal = () => {
     const { user, logout, authenticatedFetch } = useAuth()
+    const navigate = useNavigate() // Hook para navegación
     const [activeSection, setActiveSection] = useState('dashboard')
     const [activities, setActivities] = useState([])
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    const handleLogout = () => {
-        logout()
+    const handleLogout = async () => {
+        try {
+            await logout() // Ejecutar logout del contexto
+            navigate('/login', { replace: true }) // Redirigir al login
+        } catch (error) {
+            console.error('Error durante el logout:', error)
+            // Incluso si hay error, redirigir al login
+            navigate('/login', { replace: true })
+        }
     }
 
     const loadActivities = async () => {
@@ -96,6 +106,13 @@ const PaginaPrincipal = () => {
         }
     }
 
+    // Verificar si el usuario está autenticado
+    useEffect(() => {
+        if (!user) {
+            navigate('/login', { replace: true })
+        }
+    }, [user, navigate])
+
     useEffect(() => {
         if (activeSection === 'activities') {
             loadActivities()
@@ -104,9 +121,14 @@ const PaginaPrincipal = () => {
         }
     }, [activeSection])
 
+    // Si no hay usuario, no renderizar nada (se redirigirá)
+    if (!user) {
+        return <div className="loading">Cargando...</div>
+    }
+
     const renderContent = () => {
         if (loading) {
-            return <div>Cargando...</div>
+            return <div className="loading">Cargando...</div>
         }
 
         switch (activeSection) {
@@ -177,6 +199,29 @@ const PaginaPrincipal = () => {
             <header className="header">
                 <div className="header-content">
                     <h1>Panel Principal</h1>
+
+                    {/* Navegación movida al header */}
+                    <nav className="header-nav">
+                        <button
+                            onClick={() => setActiveSection('dashboard')}
+                            className={`nav-button ${activeSection === 'dashboard' ? 'active' : ''}`}
+                        >
+                            Dashboard
+                        </button>
+                        <button
+                            onClick={() => setActiveSection('activities')}
+                            className={`nav-button ${activeSection === 'activities' || activeSection === 'create-activity' ? 'active' : ''}`}
+                        >
+                            Actividades
+                        </button>
+                        <button
+                            onClick={() => setActiveSection('users')}
+                            className={`nav-button ${activeSection === 'users' ? 'active' : ''}`}
+                        >
+                            Usuarios
+                        </button>
+                    </nav>
+
                     <div className="user-info">
                         <span>Bienvenido, {user?.username}</span>
                         <button onClick={handleLogout} className="logout-button">
@@ -187,35 +232,6 @@ const PaginaPrincipal = () => {
             </header>
 
             <div className="main-layout">
-                <nav className="sidebar">
-                    <ul>
-                        <li>
-                            <button
-                                onClick={() => setActiveSection('dashboard')}
-                                className={activeSection === 'dashboard' ? 'active' : ''}
-                            >
-                                Dashboard
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveSection('activities')}
-                                className={activeSection === 'activities' || activeSection === 'create-activity' ? 'active' : ''}
-                            >
-                                Actividades
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => setActiveSection('users')}
-                                className={activeSection === 'users' ? 'active' : ''}
-                            >
-                                Usuarios
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
-
                 <main className="main-content">
                     {error && (
                         <div className="error-message">

@@ -1,47 +1,79 @@
+/* PaginaPrincipal.css */
 .pagina-principal {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #f5f5f5;
 }
 
 .header {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 1rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 2rem;
 }
 
 .header h1 {
-    color: white;
+    margin: 0;
     font-size: 1.8rem;
     font-weight: 600;
-    margin: 0;
+    white-space: nowrap;
+}
+
+/* Navegación en el header */
+.header-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.nav-button.active {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .user-info {
     display: flex;
     align-items: center;
     gap: 1rem;
-    color: white;
+    white-space: nowrap;
 }
 
 .logout-button {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 0.5rem 1rem;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-weight: 500;
 }
 
 .logout-button:hover {
@@ -49,81 +81,189 @@
     transform: translateY(-1px);
 }
 
-.main-content {
+.main-layout {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
 }
 
-.dashboard {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
+.main-content {
+    background: white;
+    border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    min-height: 70vh;
 }
 
+/* Dashboard */
 .dashboard h2 {
     color: #333;
     margin-bottom: 1rem;
-    font-size: 1.5rem;
+    font-size: 2rem;
 }
 
 .dashboard p {
     color: #666;
     margin-bottom: 2rem;
+    font-size: 1.1rem;
 }
 
-.cards-container {
+.stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }
 
-.card {
-    background: white;
-    padding: 1.5rem;
+.stat-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+.stat-card:hover {
+    transform: translateY(-5px);
 }
 
-.card h3 {
-    color: #333;
-    margin-bottom: 0.5rem;
-    font-size: 1.2rem;
+.stat-card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.9;
 }
 
-.card p {
-    color: #666;
+.stat-card p {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
 }
 
+/* Secciones */
+.activities-section h2,
+.users-section h2,
+.create-activity-section h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.section-controls {
+    margin-bottom: 2rem;
+}
+
+.section-controls button,
+.create-activity-section>button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.section-controls button:hover,
+.create-activity-section>button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* Error message */
+.error-message {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.error-message button {
+    background: none;
+    border: none;
+    color: #c33;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+    .header {
+        padding: 1rem;
+    }
+
     .header-content {
-        padding: 0 1rem;
         flex-direction: column;
         gap: 1rem;
+        align-items: stretch;
+    }
+
+    .header h1 {
         text-align: center;
+        font-size: 1.5rem;
+    }
+
+    .header-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .nav-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .user-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .main-layout {
+        padding: 1rem;
     }
 
     .main-content {
         padding: 1rem;
     }
 
-    .dashboard {
-        padding: 1.5rem;
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-nav {
+        flex-direction: column;
+        gap: 0.25rem;
     }
 
-    .cards-container {
-        grid-template-columns: 1fr;
+    .nav-button {
+        width: 100%;
+        text-align: center;
     }
 }

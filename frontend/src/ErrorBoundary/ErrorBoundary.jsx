@@ -39,7 +39,8 @@ class ErrorBoundary extends React.Component {
                     border: '1px solid #f5c6cb',
                     borderRadius: '4px',
                     backgroundColor: '#f8d7da',
-                    color: '#721c24'
+                    color: '#721c24',
+                    fontFamily: 'Arial, sans-serif'
                 }}>
                     <h2>¡Oops! Algo salió mal</h2>
                     <p>Ha ocurrido un error inesperado en la aplicación.</p>
@@ -54,8 +55,11 @@ class ErrorBoundary extends React.Component {
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '4px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                fontSize: '14px'
                             }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#c82333'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#dc3545'}
                         >
                             Recargar Página
                         </button>
@@ -67,8 +71,11 @@ class ErrorBoundary extends React.Component {
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '4px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                fontSize: '14px'
                             }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#5a6268'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#6c757d'}
                         >
                             Intentar de Nuevo
                         </button>
@@ -88,13 +95,21 @@ class ErrorBoundary extends React.Component {
                                 borderRadius: '4px',
                                 fontSize: '12px',
                                 fontFamily: 'monospace',
-                                whiteSpace: 'pre-wrap'
+                                whiteSpace: 'pre-wrap',
+                                overflow: 'auto',
+                                maxHeight: '400px'
                             }}>
                                 <strong>Error:</strong><br />
-                                {this.state.error && this.state.error.toString()}
+                                {this.state.error ? this.state.error.toString() : 'Error desconocido'}
                                 <br /><br />
                                 <strong>Stack Trace:</strong><br />
-                                {this.state.errorInfo.componentStack}
+                                {this.state.error && this.state.error.stack ? this.state.error.stack : 'Stack trace no disponible'}
+                                <br /><br />
+                                <strong>Component Stack:</strong><br />
+                                {this.state.errorInfo && this.state.errorInfo.componentStack
+                                    ? this.state.errorInfo.componentStack
+                                    : 'Component stack no disponible'
+                                }
                             </div>
                         </details>
                     )}
