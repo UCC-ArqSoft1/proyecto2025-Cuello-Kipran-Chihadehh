@@ -1,55 +1,68 @@
-/* Centra el contenedor en la página */
+/* Login.css */
 .login-container {
+  min-height: 100vh;
+  background-color: #111;
+  color: #eee;
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f4f4f4;
+  justify-content: center;
 }
 
-/* Estiliza el formulario */
 .login-form {
-  background-color: white;
+  background-color: #1e1e1e;
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Título */
 .login-form h2 {
-  text-align: center;
   margin-bottom: 1rem;
+  font-size: 1.8rem;
+  text-align: center;
 }
 
-/* Inputs */
 .login-form input {
-  width: 100%;
-  padding: 10px;
-  margin: 0.5rem 0 1rem 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-/* Botón */
-.login-form button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Botón al pasar el mouse */
-.login-form button:hover {
-  background-color: #0056b3;
-}
-
-/* Mensaje de error */
-.error {
-  color: red;
   margin-bottom: 1rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #2a2a2a;
+  color: #eee;
+}
+
+.login-form button {
+  padding: 0.8rem;
+  background-color: #e91e63;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: #c2185b;
+}
+
+.error {
+  background-color: #ff4444;
+  padding: 0.5rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  color: white;
   text-align: center;
+}
+
+.logout-top {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  padding-right: 1rem;
 }

@@ -23,10 +23,14 @@ const Login = () => {
       });
 
       if (!response.ok) throw new Error("Login failed");
-      const data = await response.json();
-      document.cookie = `token=${data.token}; path=/; SameSite=Strict`;
 
-      navigate("/paginaprincipal");
+      const data = await response.json();
+
+      // ✅ Guardar en localStorage como espera AuthContext
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user)); // asegurate de que tu backend devuelva "user"
+
+      navigate("/dashboard");
     } catch {
       setError("Credenciales incorrectas");
     }
