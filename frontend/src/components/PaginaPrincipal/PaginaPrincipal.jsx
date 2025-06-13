@@ -64,7 +64,54 @@ const PaginaPrincipal = () => {
       setLoading(false);
     }
   };
+  const InscribeToActivity = async (activityId) => {
+    try {
+      console.log('Intentando inscribir usuario:', user.id, 'en actividad:', activityId);
 
+      const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
+
+      // CORRECCIÓN 1: URL correcta según tu controller
+      const response = await fetchFunction('http://localhost:8080/inscriptions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // CORRECCIÓN 2: Body con estructura correcta según tu domain.InscripcionRequest
+        body: JSON.stringify({
+          usuario_id: user.id,    // Debe coincidir con el JSON tag en Go
+          actividad_id: activityId // Debe coincidir con el JSON tag en Go
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Inscripción exitosa:', data);
+        await loadActivities(); // Recargar actividades para actualizar cupos
+        return true;
+      } else {
+        // Manejar errores específicos del backend
+        const errorData = await response.json();
+        console.error('Error del servidor:', errorData);
+
+        // Mostrar mensaje específico basado en el error
+        if (response.status === 409) {
+          if (errorData.error.includes('already inscribed')) {
+            throw new Error('Ya estás inscrito en esta actividad');
+          } else if (errorData.error.includes('no available slots')) {
+            throw new Error('No hay cupos disponibles para esta actividad');
+          }
+        } else if (response.status === 404) {
+          throw new Error('Usuario o actividad no encontrada');
+        }
+
+        throw new Error(errorData.error || 'Error al procesar la inscripción');
+      }
+    } catch (err) {
+      console.error('Error inscribiéndose a la actividad:', err);
+      setError('Error inscribiéndose a la actividad: ' + err.message);
+      return false;
+    }
+  };
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -192,19 +239,10 @@ const PaginaPrincipal = () => {
               activities={activities}
               onUpdate={updateActivity}
               onDelete={deleteActivity}
-            />
-          </div>
-        );
-      case 'create-activity':
-        return (
-          <div className="create-activity-section">
-            <h2>Crear Nueva Actividad</h2>
-            <button onClick={() => setActiveSection('activities')}>
-              Volver a Actividades
-            </button>
-            <ActivityForm
-              onSubmit={createActivity}
-              onCancel={() => setActiveSection('activities')}
+              onInscribe={InscribeToActivity}  // AGREGAR ESTA LÍNEA
+              user={user}                      // AGREGAR ESTA LÍNEA
+              authenticatedFetch={authenticatedFetch}
+              makeAuthenticatedRequest={makeAuthenticatedRequest}
             />
           </div>
         );

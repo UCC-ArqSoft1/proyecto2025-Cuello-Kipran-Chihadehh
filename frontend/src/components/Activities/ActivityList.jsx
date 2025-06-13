@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import './Actividades.css';
 
-const ActivityList = ({ activities, onUpdate, onDelete }) => {
+const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user, authenticatedFetch, makeAuthenticatedRequest }) => {
     const [editingActivity, setEditingActivity] = useState(null)
     const [editForm, setEditForm] = useState({})
     const [textosVisibles, setTextosVisibles] = useState({})
+    const [inscribing, setInscribing] = useState(null) // Para mostrar estado de carga
 
     // Debug: Ver qué datos están llegando
     console.log('ActivityList - activities:', activities)
@@ -19,16 +20,15 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
     }
 
     const handleEdit = (activity) => {
-        // Verificar que el activity tenga id_actividad definido
+        // Verificar que el activity tenga id definido
         if (!activity.id) {
-            console.error('Activity sin id_actividad:', activity)
+            console.error('Activity sin id:', activity)
             alert('Error: No se puede editar una actividad sin ID válido')
             return
         }
 
         setEditingActivity(activity.id)
         setEditForm({
-
             nombre: activity.name || '',
             categoria: activity.categoria || '',
             profesor: activity.profesor || '',
@@ -37,6 +37,33 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
             cupos: activity.cupos || 0,
             descripcion: activity.description || ''
         })
+    }
+
+    const handleInscribe = async (activityId) => {
+        // Verificar que el activityId sea válido
+        if (!activityId) {
+            console.error('Activity ID no válido:', activityId)
+            alert('Error: No se puede inscribir en una actividad sin ID válido')
+            return
+        }
+
+
+
+        setInscribing(activityId)
+
+        try {
+            const success = await onInscribe(activityId)
+            if (success) {
+                alert('¡Inscripción exitosa!')
+            } else {
+                alert('Error al inscribirse en la actividad')
+            }
+        } catch (error) {
+            console.error('Error en inscripción:', error)
+            alert('Error al inscribirse en la actividad: ' + error.message)
+        } finally {
+            setInscribing(null)
+        }
     }
 
     const handleSave = async () => {
@@ -58,9 +85,9 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
     }
 
     const handleDelete = async (activity) => {
-        // Verificar que la actividad tenga id_actividad definido
+        // Verificar que la actividad tenga id definido
         if (!activity.id) {
-            console.error('Activity sin id_actividad:', activity)
+            console.error('Activity sin id:', activity)
             alert('Error: No se puede eliminar una actividad sin ID válido')
             return
         }
@@ -94,7 +121,6 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                 <table className="activities-table">
                     <thead>
                         <tr>
-
                             <th>Nombre</th>
                             <th>Categoría</th>
                             <th>Profesor</th>
@@ -109,12 +135,13 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                         {activities.map((activity, index) => {
                             // Verificar que la actividad tenga un ID válido
                             const activityId = activity.id || `temp-${index}`
-                            const isEditing = editingActivity === activity.id_actividad
-                            const esVisible = textosVisibles[activity.id_actividad]
+                            const isEditing = editingActivity === activity.id
+                            const esVisible = textosVisibles[activity.id]
+                            const isInscribing = inscribing === activity.id
 
-                            // Si no tiene id_actividad válido, mostrar advertencia en consola
+                            // Si no tiene id válido, mostrar advertencia en consola
                             if (!activity.id) {
-                                console.warn(`Actividad en índice ${index} sin id_actividad:`, activity)
+                                console.warn(`Actividad en índice ${index} sin id:`, activity)
                             }
 
                             return (
@@ -174,8 +201,7 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                                                 className="edit-select"
                                                 value={editForm.dia || ''}
                                                 onChange={(e) => handleInputChange('dia', e.target.value)}
-                                            >
-                                            </input>
+                                            />
                                         ) : (
                                             <span className="cell-content">
                                                 {activity.dia || 'Sin día'}
@@ -228,7 +254,7 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                                             <div className="descripcion-section">
                                                 <button
                                                     className="toggle-descripcion-btn"
-                                                    onClick={() => toggleTextoVisible(activity.id_actividad)}
+                                                    onClick={() => toggleTextoVisible(activity.id)}
                                                     type="button"
                                                 >
                                                     {esVisible ? '🙈 Ocultar' : '👁️ Ver'}
@@ -262,6 +288,18 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                                             </div>
                                         ) : (
                                             <div className="action-buttons">
+                                                <button
+                                                    className="accion-btn accion-btn-inscribe"
+                                                    onClick={() => handleInscribe(activity.id)}
+                                                    disabled={!activity.id || isInscribing || activity.cupos <= 0}
+                                                    title={
+                                                        !activity.id ? 'Actividad sin ID válido' :
+                                                            activity.cupos <= 0 ? 'Sin cupos disponibles' :
+                                                                'Inscribirse en actividad'
+                                                    }
+                                                >
+                                                    {isInscribing ? 'Inscribiendo...' : 'Inscribirse'}
+                                                </button>
                                                 <button
                                                     className="accion-btn accion-btn-edit"
                                                     onClick={() => handleEdit(activity)}

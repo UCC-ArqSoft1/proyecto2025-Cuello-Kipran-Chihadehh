@@ -203,11 +203,7 @@ func GetActivitiesByUser(c *gin.Context) {
 	})
 }
 func GetMyActivities(c *gin.Context) {
-	// Este método requerirá que implementes GetMyActivities en el service
-	// Por ahora solo devuelvo un mensaje indicando que no está implementado
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"message": "GetMyActivities service method not implemented yet",
-	})
+
 }
 
 // GetInscriptions maneja la obtención de todas las inscripciones (opcional)
