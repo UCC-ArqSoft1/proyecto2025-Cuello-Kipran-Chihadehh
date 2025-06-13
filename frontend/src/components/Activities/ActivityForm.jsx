@@ -5,9 +5,10 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
         nombre: '',
         categoria: '',
         profesor: '',
-        dia: '',
-        horario: '',
-        cupos: 0,
+        dia: 1, // Inicializar con 1 en lugar de 0
+        hora_inicio: '',
+        hora_fin: '', // Cambiar hora_final por hora_fin para coincidir con el backend
+        cupos: 1, // Inicializar con 1 en lugar de 0
         descripcion: ''
     })
     const [errors, setErrors] = useState({})
@@ -42,8 +43,24 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
             newErrors.profesor = 'El profesor es requerido'
         }
 
-        if (!formData.horario.trim()) {
-            newErrors.horario = 'El horario es requerido'
+        if (!formData.descripcion.trim()) {
+            newErrors.descripcion = 'La descripción es requerida'
+        }
+
+        if (!formData.hora_inicio.trim()) {
+            newErrors.hora_inicio = 'La hora de inicio es requerida'
+        }
+
+        if (!formData.hora_fin.trim()) {
+            newErrors.hora_fin = 'La hora de finalización es requerida'
+        }
+
+        if (formData.hora_inicio && formData.hora_fin && formData.hora_inicio >= formData.hora_fin) {
+            newErrors.hora_fin = 'La hora de finalización debe ser mayor que la de inicio'
+        }
+
+        if (formData.dia < 1 || formData.dia > 7) {
+            newErrors.dia = 'El día debe ser entre 1 y 7'
         }
 
         if (formData.cupos < 1) {
@@ -62,17 +79,34 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
         }
 
         setLoading(true)
-        const success = await onSubmit(formData)
+
+        // Preparar los datos para enviar al backend con los nombres correctos
+        const activityData = {
+            name: formData.nombre,           // Backend espera 'name'
+            categoria: formData.categoria,
+            profesor: formData.profesor,
+            dia: parseInt(formData.dia),     // Asegurar que sea entero
+            hora_inicio: formData.hora_inicio,
+            hora_fin: formData.hora_fin,     // Backend espera 'hora_fin'
+            cupos: parseInt(formData.cupos), // Asegurar que sea entero
+            description: formData.descripcion // Backend espera 'description'
+        }
+
+        console.log('Datos a enviar:', activityData) // Para debug
+
+        const success = await onSubmit(activityData)
         setLoading(false)
 
         if (success) {
+            // Reset del formulario corregido
             setFormData({
                 nombre: '',
                 categoria: '',
                 profesor: '',
-                dia: '',
-                horario: '',
-                cupos: 0,
+                dia: 1,
+                hora_inicio: '',
+                hora_fin: '',
+                cupos: 1,
                 descripcion: ''
             })
             onCancel() // Regresar a la lista
@@ -122,30 +156,46 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="dia">Día</label>
-                    <input
-                        type="number"
+                    <label htmlFor="dia">Día de la semana</label>
+                    <select
                         id="dia"
                         value={formData.dia}
-                        onChange={(e) => handleInputChange('dia', e.target.value)}
-                        placeholder="numero del dia"
+                        onChange={(e) => handleInputChange('dia', parseInt(e.target.value))}
                         disabled={loading}
                     >
-                    </input>
+                        <option value={1}>Lunes</option>
+                        <option value={2}>Martes</option>
+                        <option value={3}>Miércoles</option>
+                        <option value={4}>Jueves</option>
+                        <option value={5}>Viernes</option>
+                        <option value={6}>Sábado</option>
+                        <option value={7}>Domingo</option>
+                    </select>
                     {errors.dia && <span className="error">{errors.dia}</span>}
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="horario">Horario</label>
+                    <label htmlFor="hora_inicio">Hora de inicio</label>
                     <input
-                        type="text"
-                        id="horario"
-                        value={formData.horario}
-                        onChange={(e) => handleInputChange('horario', e.target.value)}
-                        placeholder="Ej: 08:00 - 09:30"
+                        type="time"
+                        id="hora_inicio"
+                        value={formData.hora_inicio}
+                        onChange={(e) => handleInputChange('hora_inicio', e.target.value)}
                         disabled={loading}
                     />
-                    {errors.horario && <span className="error">{errors.horario}</span>}
+                    {errors.hora_inicio && <span className="error">{errors.hora_inicio}</span>}
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="hora_fin">Hora de finalización</label>
+                    <input
+                        type="time"
+                        id="hora_fin"
+                        value={formData.hora_fin}
+                        onChange={(e) => handleInputChange('hora_fin', e.target.value)}
+                        disabled={loading}
+                    />
+                    {errors.hora_fin && <span className="error">{errors.hora_fin}</span>}
                 </div>
 
                 <div className="form-group">
@@ -154,7 +204,7 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
                         type="number"
                         id="cupos"
                         value={formData.cupos}
-                        onChange={(e) => handleInputChange('cupos', parseInt(e.target.value) || 0)}
+                        onChange={(e) => handleInputChange('cupos', parseInt(e.target.value) || 1)}
                         min="1"
                         disabled={loading}
                     />
@@ -162,7 +212,7 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="descripcion">Descripción (Opcional)</label>
+                    <label htmlFor="descripcion">Descripción</label>
                     <textarea
                         id="descripcion"
                         value={formData.descripcion}
@@ -171,6 +221,7 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
                         rows="4"
                         disabled={loading}
                     />
+                    {errors.descripcion && <span className="error">{errors.descripcion}</span>}
                 </div>
 
                 <div className="form-actions">

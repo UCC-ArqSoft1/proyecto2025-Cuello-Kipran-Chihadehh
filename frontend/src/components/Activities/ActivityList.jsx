@@ -28,7 +28,7 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
 
         setEditingActivity(activity.id)
         setEditForm({
-            id_actividad: activity.id,
+
             nombre: activity.name || '',
             categoria: activity.categoria || '',
             profesor: activity.profesor || '',
