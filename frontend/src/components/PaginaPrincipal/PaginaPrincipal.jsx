@@ -71,7 +71,7 @@ const PaginaPrincipal = () => {
       const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
 
       // CORRECCIÓN 1: URL correcta según tu controller
-      const response = await fetchFunction('http://localhost:8080/inscriptions', {
+      const response = await fetchFunction('http://localhost:8080/inscription', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,10 +239,21 @@ const PaginaPrincipal = () => {
               activities={activities}
               onUpdate={updateActivity}
               onDelete={deleteActivity}
-              onInscribe={InscribeToActivity}  // AGREGAR ESTA LÍNEA
-              user={user}                      // AGREGAR ESTA LÍNEA
-              authenticatedFetch={authenticatedFetch}
-              makeAuthenticatedRequest={makeAuthenticatedRequest}
+              onInscribe={InscribeToActivity}
+            />
+          </div>
+        );
+      case 'create-activity':
+        return (
+          <div className="create-activity-section">
+            <h2>Crear Nueva Actividad</h2>
+            <button onClick={() => setActiveSection('activities')}>
+              Volver a Actividades
+            </button>
+            <ActivityForm
+              onSubmit={createActivity}
+              onCancel={() => setActiveSection('activities')}
+              onInscribe={InscribeToActivity}
             />
           </div>
         );

@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
     // Verificar si hay un token guardado al cargar la aplicación
     useEffect(() => {
-        const token = localStorage.getItem('token'); // CAMBIAR de 'authToken' a 'token'
+        const token = localStorage.getItem('authToken');
         const savedUser = localStorage.getItem('user');
 
         if (token && savedUser) {
@@ -30,23 +30,9 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // Función para hacer requests autenticados
-    const authenticatedFetch = async (url, options = {}) => {
-        const token = localStorage.getItem('token');
-
-        return fetch(url, {
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-                ...options.headers,
-            },
-        });
-    };
-
     // Función para iniciar sesión
     const login = (userData, token) => {
-        localStorage.setItem('token', token); // CAMBIAR de 'authToken' a 'token'
+        localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
@@ -54,15 +40,15 @@ export const AuthProvider = ({ children }) => {
 
     // Función para cerrar sesión
     const logout = () => {
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-    };
+        setUser(null)
+        setToken(null)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+    }
 
     // Función para obtener el token
     const getToken = () => {
-        return localStorage.getItem('token'); // CAMBIAR de 'authToken' a 'token'
+        return localStorage.getItem('authToken');
     };
 
     const value = {
@@ -71,8 +57,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
-        getToken,
-        authenticatedFetch // AGREGAR authenticatedFetch al contexto
+        getToken
     };
 
     return (
