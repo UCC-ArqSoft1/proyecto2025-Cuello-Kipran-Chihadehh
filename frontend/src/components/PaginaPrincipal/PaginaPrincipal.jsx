@@ -231,7 +231,7 @@ const PaginaPrincipal = () => {
             </div>
             <div className="activity-list-header">
               <h3>Lista de Actividades ({activities.length})</h3>
-              <button onClick={loadActivities} className="refresh-button">
+              <button className="refresh-button" onClick={loadActivities} >
                 Actualizar
               </button>
             </div>
@@ -282,7 +282,7 @@ const PaginaPrincipal = () => {
         </button>
 
         <div className="header-content">
-          <h1>Panel Principal</h1>
+          <h1>EverLifting</h1>
           <nav className="header-nav full-width-nav">
             <button
               onClick={() => setActiveSection('dashboard')}

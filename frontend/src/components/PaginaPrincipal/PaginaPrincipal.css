@@ -164,6 +164,14 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.refresh-button {
+  color: #eee;
+  background-color: #c2185b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
 /* ERROR */
 .error-message {
   background-color: #ff4444;

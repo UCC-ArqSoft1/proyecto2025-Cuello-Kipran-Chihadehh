@@ -182,6 +182,12 @@ body {
     border-color: #ef4444;
 }
 
+.accion-btn-inscribe {
+    color: #00c925;
+    background-color: transparent;
+    border-color: #00c925;
+}
+
 .accion-btn-delete:hover {
     background-color: #ef4444;
     color: white;
@@ -501,4 +507,35 @@ body {
         transition: none !important;
         transform: none !important;
     }
+}
+
+.search-bar-actividades {
+    display: flex;
+    justify-content: flex-st;
+    margin-bottom: 1rem;
+}
+
+.search-input-actividades {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background-color: #1e1e1e;
+    color: #eee;
+    font-size: 1rem;
+    max-width: 300px;
+    width: 100%;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+.search-input-actividades::placeholder {
+    color: #999;
+}
+
+.search-input-actividades:focus,
+.search-input-actividades:hover {
+    background-color: #2a2a2a;
+    border-color: #e91e63;
+    outline: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(233, 30, 99, 0.3);
 }

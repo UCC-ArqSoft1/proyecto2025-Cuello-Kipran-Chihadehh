@@ -6,6 +6,7 @@ type User struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	IsAdmin  bool   `json:"is_admin"`
+	Token    string `json:"token"` // Token opcional para autenticación
 }
 
 type UserResponse struct {

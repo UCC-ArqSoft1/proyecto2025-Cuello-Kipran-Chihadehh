@@ -4,6 +4,7 @@ import (
 	"backend/clients"
 	"backend/dao"
 	"backend/domain"
+	"backend/utils"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -21,11 +22,16 @@ func Login(username, password string) (domain.User, error) {
 	if userDao.PasswordHash != hashPassword(password) {
 		return domain.User{}, errors.New("invalid password")
 	}
-
+	token, err := utils.GenerateJWT(userDao.ID)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to generate token: %w", err)
+	}
 	return domain.User{
 		ID:       userDao.ID,
+		Name:     userDao.Name,
 		Username: userDao.Username,
 		IsAdmin:  userDao.IsAdmin,
+		Token:    token,
 	}, nil
 }
 
