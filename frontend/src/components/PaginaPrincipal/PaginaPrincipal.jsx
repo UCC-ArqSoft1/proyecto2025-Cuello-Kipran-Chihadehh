@@ -15,15 +15,48 @@ const PaginaPrincipal = () => {
 
   const handleLogout = () => logout();
 
+  // Función alternativa si authenticatedFetch no funciona
+  const makeAuthenticatedRequest = async (url, options = {}) => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers,
+      },
+    });
+  };
+
   const loadActivities = async () => {
     try {
       setLoading(true);
-      const response = await authenticatedFetch('http://localhost:8080/activities');
+
+      // Debug: Verificar si authenticatedFetch existe
+      console.log('authenticatedFetch:', authenticatedFetch);
+      console.log('user:', user);
+
+      // Usar authenticatedFetch si está disponible, sino usar la función alternativa
+      const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
+
+      const response = await fetchFunction('http://localhost:8080/activities');
+      console.log('Response:', response);
+
       if (response.ok) {
         const data = await response.json();
-        setActivities(data);
+        console.log('API Response - activities data:', data);
+
+        // La API devuelve un objeto con la propiedad 'activities'
+        const activitiesArray = data.activities || data;
+        console.log('Activities array:', activitiesArray);
+
+        setActivities(activitiesArray);
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (err) {
+      console.error('Error en loadActivities:', err);
       setError('Error cargando actividades: ' + err.message);
     } finally {
       setLoading(false);
@@ -33,10 +66,15 @@ const PaginaPrincipal = () => {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const response = await authenticatedFetch('http://localhost:8080/users');
+      const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
+      const response = await fetchFunction('http://localhost:8080/users');
       if (response.ok) {
         const data = await response.json();
-        setUsers(data);
+        console.log('API Response - users data:', data);
+
+        // La API puede devolver un objeto con la propiedad 'users' o directamente el array
+        const usersArray = data.users || data;
+        setUsers(usersArray);
       }
     } catch (err) {
       setError('Error cargando usuarios: ' + err.message);
@@ -47,7 +85,8 @@ const PaginaPrincipal = () => {
 
   const createActivity = async (activityData) => {
     try {
-      const response = await authenticatedFetch('http://localhost:8080/activities', {
+      const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
+      const response = await fetchFunction('http://localhost:8080/activities', {
         method: 'POST',
         body: JSON.stringify(activityData)
       });
@@ -64,7 +103,8 @@ const PaginaPrincipal = () => {
 
   const updateActivity = async (id, activityData) => {
     try {
-      const response = await authenticatedFetch(`http://localhost:8080/activities/${id}`, {
+      const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
+      const response = await fetchFunction(`http://localhost:8080/activities/${id}`, {
         method: 'PUT',
         body: JSON.stringify(activityData)
       });
@@ -81,7 +121,8 @@ const PaginaPrincipal = () => {
 
   const deleteActivity = async (id) => {
     try {
-      const response = await authenticatedFetch(`http://localhost:8080/activities/${id}`, {
+      const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
+      const response = await fetchFunction(`http://localhost:8080/activities/${id}`, {
         method: 'DELETE'
       });
       if (response.ok) {
@@ -137,6 +178,12 @@ const PaginaPrincipal = () => {
             <div className="section-controls">
               <button onClick={() => setActiveSection('create-activity')}>
                 Nueva Actividad
+              </button>
+            </div>
+            <div className="activity-list-header">
+              <h3>Lista de Actividades ({activities.length})</h3>
+              <button onClick={loadActivities} className="refresh-button">
+                Actualizar
               </button>
             </div>
             <ActivityList

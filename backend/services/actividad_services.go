@@ -16,9 +16,6 @@ func GetActivityByID(id int) (domain.Activity, error) {
 		return domain.Activity{}, fmt.Errorf("activity not found with id %d: %w", id, err)
 	}
 
-	// Convertir día de string a int si es necesario
-	dia, _ := strconv.Atoi(activityDao.Dia)
-
 	return domain.Activity{
 		ID:          activityDao.ID_actividad,
 		Name:        activityDao.Nombre,
@@ -26,7 +23,7 @@ func GetActivityByID(id int) (domain.Activity, error) {
 		Categoria:   activityDao.Categoria,
 		Cupos:       activityDao.Cupos,
 		Description: activityDao.Descripcion,
-		Dia:         dia,
+		Dia:         activityDao.Dia,
 		HoraInicio:  activityDao.Hora_inicio,
 		HoraFin:     activityDao.Hora_fin,
 	}, nil
@@ -41,7 +38,6 @@ func GetActivities() ([]domain.Activity, error) {
 
 	var activities []domain.Activity
 	for _, activityDao := range activitiesDao {
-		dia, _ := strconv.Atoi(activityDao.Dia)
 
 		activities = append(activities, domain.Activity{
 			ID:          activityDao.ID_actividad,
@@ -50,7 +46,7 @@ func GetActivities() ([]domain.Activity, error) {
 			Categoria:   activityDao.Categoria,
 			Cupos:       activityDao.Cupos,
 			Description: activityDao.Descripcion,
-			Dia:         dia,
+			Dia:         activityDao.Dia,
 			HoraInicio:  activityDao.Hora_inicio,
 			HoraFin:     activityDao.Hora_fin,
 		})
@@ -71,6 +67,9 @@ func InsertActivity(activity domain.Activity) (domain.Activity, error) {
 	if activity.Categoria == "" {
 		return domain.Activity{}, errors.New("categoria cannot be empty")
 	}
+	if activity.Description == "" {
+		return domain.Activity{}, errors.New("description cannot be empty")
+	}
 	if activity.Cupos <= 0 {
 		return domain.Activity{}, errors.New("cupos must be greater than 0")
 	}
@@ -85,7 +84,7 @@ func InsertActivity(activity domain.Activity) (domain.Activity, error) {
 		Cupos:       activity.Cupos,
 		Categoria:   activity.Categoria,
 		Descripcion: activity.Description,
-		Dia:         strconv.Itoa(activity.Dia),
+		Dia:         activity.Dia,
 		Hora_inicio: activity.HoraInicio,
 		Hora_fin:    activity.HoraFin,
 	}
@@ -97,7 +96,7 @@ func InsertActivity(activity domain.Activity) (domain.Activity, error) {
 	}
 
 	// Convertir de vuelta a domain.Activity
-	dia, _ := strconv.Atoi(createdActivity.Dia)
+
 	return domain.Activity{
 		ID:          createdActivity.ID_actividad,
 		Name:        createdActivity.Nombre,
@@ -105,7 +104,7 @@ func InsertActivity(activity domain.Activity) (domain.Activity, error) {
 		Categoria:   createdActivity.Categoria,
 		Cupos:       createdActivity.Cupos,
 		Description: createdActivity.Descripcion,
-		Dia:         dia,
+		Dia:         createdActivity.Dia,
 		HoraInicio:  createdActivity.Hora_inicio,
 		HoraFin:     createdActivity.Hora_fin,
 	}, nil
@@ -120,7 +119,6 @@ func GetActivitiesByCategory(categoria string) ([]domain.Activity, error) {
 
 	var activities []domain.Activity
 	for _, activityDao := range activitiesDao {
-		dia, _ := strconv.Atoi(activityDao.Dia)
 
 		activities = append(activities, domain.Activity{
 			ID:          activityDao.ID_actividad,
@@ -129,7 +127,7 @@ func GetActivitiesByCategory(categoria string) ([]domain.Activity, error) {
 			Categoria:   activityDao.Categoria,
 			Cupos:       activityDao.Cupos,
 			Description: activityDao.Descripcion,
-			Dia:         dia,
+			Dia:         activityDao.Dia,
 			HoraInicio:  activityDao.Hora_inicio,
 			HoraFin:     activityDao.Hora_fin,
 		})
@@ -147,7 +145,6 @@ func GetActivitiesByProfesor(profesor string) ([]domain.Activity, error) {
 
 	var activities []domain.Activity
 	for _, activityDao := range activitiesDao {
-		dia, _ := strconv.Atoi(activityDao.Dia)
 
 		activities = append(activities, domain.Activity{
 			ID:          activityDao.ID_actividad,
@@ -156,7 +153,7 @@ func GetActivitiesByProfesor(profesor string) ([]domain.Activity, error) {
 			Categoria:   activityDao.Categoria,
 			Cupos:       activityDao.Cupos,
 			Description: activityDao.Descripcion,
-			Dia:         dia,
+			Dia:         activityDao.Dia,
 			HoraInicio:  activityDao.Hora_inicio,
 			HoraFin:     activityDao.Hora_fin,
 		})
@@ -174,7 +171,6 @@ func GetActivitiesByDay(dia int) ([]domain.Activity, error) {
 
 	var activities []domain.Activity
 	for _, activityDao := range activitiesDao {
-		diaInt, _ := strconv.Atoi(activityDao.Dia)
 
 		activities = append(activities, domain.Activity{
 			ID:          activityDao.ID_actividad,
@@ -183,7 +179,7 @@ func GetActivitiesByDay(dia int) ([]domain.Activity, error) {
 			Categoria:   activityDao.Categoria,
 			Cupos:       activityDao.Cupos,
 			Description: activityDao.Descripcion,
-			Dia:         diaInt,
+			Dia:         activityDao.Dia,
 			HoraInicio:  activityDao.Hora_inicio,
 			HoraFin:     activityDao.Hora_fin,
 		})
@@ -217,7 +213,7 @@ func UpdateActivity(activity domain.Activity) error {
 		currentActivity.Descripcion = activity.Description
 	}
 	if activity.Dia > 0 {
-		currentActivity.Dia = strconv.Itoa(activity.Dia)
+		currentActivity.Dia = activity.Dia
 	}
 	if activity.HoraInicio != "" {
 		currentActivity.Hora_inicio = activity.HoraInicio
@@ -243,7 +239,6 @@ func GetActivitiesWithAvailableSlots() ([]domain.Activity, error) {
 
 	var activities []domain.Activity
 	for _, activityDao := range activitiesDao {
-		dia, _ := strconv.Atoi(activityDao.Dia)
 
 		activities = append(activities, domain.Activity{
 			ID:          activityDao.ID_actividad,
@@ -252,7 +247,7 @@ func GetActivitiesWithAvailableSlots() ([]domain.Activity, error) {
 			Categoria:   activityDao.Categoria,
 			Cupos:       activityDao.Cupos,
 			Description: activityDao.Descripcion,
-			Dia:         dia,
+			Dia:         activityDao.Dia,
 			HoraInicio:  activityDao.Hora_inicio,
 			HoraFin:     activityDao.Hora_fin,
 		})
@@ -278,7 +273,6 @@ func SearchActivitiesByName(name string) ([]domain.Activity, error) {
 
 	var activities []domain.Activity
 	for _, activityDao := range activitiesDao {
-		dia, _ := strconv.Atoi(activityDao.Dia)
 
 		activities = append(activities, domain.Activity{
 			ID:          activityDao.ID_actividad,
@@ -287,7 +281,7 @@ func SearchActivitiesByName(name string) ([]domain.Activity, error) {
 			Categoria:   activityDao.Categoria,
 			Cupos:       activityDao.Cupos,
 			Description: activityDao.Descripcion,
-			Dia:         dia,
+			Dia:         activityDao.Dia,
 			HoraInicio:  activityDao.Hora_inicio,
 			HoraFin:     activityDao.Hora_fin,
 		})

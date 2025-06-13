@@ -5,7 +5,6 @@ import (
 	"backend/dao"
 	"backend/domain"
 	"errors"
-	"strconv"
 )
 
 func GetInscriptionByID(id int) (*domain.Inscripcion, error) {
@@ -41,12 +40,9 @@ func GetInscriptionByID(id int) (*domain.Inscripcion, error) {
 			Categoria:   activity.Categoria,
 			Cupos:       activity.Cupos,
 			Description: activity.Descripcion,
-			Dia: func() int {
-				diaInt, _ := strconv.Atoi(activity.Dia)
-				return diaInt
-			}(),
-			HoraInicio: activity.Hora_inicio,
-			HoraFin:    activity.Hora_fin,
+			Dia:         activity.Dia,
+			HoraInicio:  activity.Hora_inicio,
+			HoraFin:     activity.Hora_fin,
 		},
 	}, nil
 }
@@ -112,12 +108,9 @@ func CreateInscription(inscripcion domain.Inscripcion) (*domain.Inscripcion, err
 			Categoria:   activity.Categoria,
 			Cupos:       newSlots, // Cupos actualizados
 			Description: activity.Descripcion,
-			Dia: func() int {
-				diaInt, _ := strconv.Atoi(activity.Dia)
-				return diaInt
-			}(),
-			HoraInicio: activity.Hora_inicio,
-			HoraFin:    activity.Hora_fin,
+			Dia:         activity.Dia,
+			HoraInicio:  activity.Hora_inicio,
+			HoraFin:     activity.Hora_fin,
 		},
 	}, nil
 }
@@ -158,12 +151,9 @@ func GetAllInscriptions() ([]domain.Inscripcion, error) {
 				Categoria:   activity.Categoria,
 				Cupos:       activity.Cupos,
 				Description: activity.Descripcion,
-				Dia: func() int {
-					diaInt, _ := strconv.Atoi(activity.Dia)
-					return diaInt
-				}(),
-				HoraInicio: activity.Hora_inicio,
-				HoraFin:    activity.Hora_fin,
+				Dia:         activity.Dia,
+				HoraInicio:  activity.Hora_inicio,
+				HoraFin:     activity.Hora_fin,
 			},
 		})
 	}

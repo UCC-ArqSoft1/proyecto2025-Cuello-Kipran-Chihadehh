@@ -4,16 +4,20 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
     const [editingActivity, setEditingActivity] = useState(null)
     const [editForm, setEditForm] = useState({})
 
+    // Debug: Ver qué datos están llegando
+    console.log('ActivityList - activities:', activities)
+    console.log('ActivityList - activities length:', activities?.length)
+
     const handleEdit = (activity) => {
         setEditingActivity(activity.id_actividad)
         setEditForm({
-            nombre: activity.nombre,
-            categoria: activity.categoria,
+            nombre: activity.name,
+            categoria: activity.Categoria,
             profesor: activity.profesor,
             dia: activity.dia,
-            horario: activity.horario,
+            horario: activity.hora_inicio,
             cupos: activity.cupos,
-            descripcion: activity.descripcion || ''
+            descripcion: activity.description || ''
         })
     }
 
@@ -64,48 +68,49 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {activities.map(activity => (
-                        <tr key={activity.id_actividad}>
-                            <td>{activity.id_actividad}</td>
+                    {activities.map((activity, index) => (
+                        <tr key={activity.id_actividad || `activity-${index}`}>
+                            <td>{activity.id_actividad || 'N/A'}</td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <input
                                         type="text"
-                                        value={editForm.nombre}
+                                        value={editForm.nombre || ''}
                                         onChange={(e) => handleInputChange('nombre', e.target.value)}
                                     />
                                 ) : (
-                                    activity.nombre
+                                    activity.nombre || 'Sin nombre'
                                 )}
                             </td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <input
                                         type="text"
-                                        value={editForm.categoria}
+                                        value={editForm.categoria || ''}
                                         onChange={(e) => handleInputChange('categoria', e.target.value)}
                                     />
                                 ) : (
-                                    activity.categoria
+                                    activity.categoria || 'Sin categoría'
                                 )}
                             </td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <input
                                         type="text"
-                                        value={editForm.profesor}
+                                        value={editForm.profesor || ''}
                                         onChange={(e) => handleInputChange('profesor', e.target.value)}
                                     />
                                 ) : (
-                                    activity.profesor
+                                    activity.profesor || 'Sin profesor'
                                 )}
                             </td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <select
-                                        value={editForm.dia}
+                                        value={editForm.dia || ''}
                                         onChange={(e) => handleInputChange('dia', e.target.value)}
                                     >
+                                        <option value="">Seleccionar día</option>
                                         <option value="Lunes">Lunes</option>
                                         <option value="Martes">Martes</option>
                                         <option value="Miércoles">Miércoles</option>
@@ -115,37 +120,37 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
                                         <option value="Domingo">Domingo</option>
                                     </select>
                                 ) : (
-                                    activity.dia
+                                    activity.dia || 'Sin día'
                                 )}
                             </td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <input
                                         type="text"
-                                        value={editForm.horario}
+                                        value={editForm.horario || ''}
                                         onChange={(e) => handleInputChange('horario', e.target.value)}
                                         placeholder="HH:MM - HH:MM"
                                     />
                                 ) : (
-                                    activity.horario
+                                    activity.horario || 'Sin horario'
                                 )}
                             </td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <input
                                         type="number"
-                                        value={editForm.cupos}
-                                        onChange={(e) => handleInputChange('cupos', parseInt(e.target.value))}
+                                        value={editForm.cupos || ''}
+                                        onChange={(e) => handleInputChange('cupos', parseInt(e.target.value) || 0)}
                                         min="0"
                                     />
                                 ) : (
-                                    activity.cupos
+                                    activity.cupos || '0'
                                 )}
                             </td>
                             <td>
                                 {editingActivity === activity.id_actividad ? (
                                     <textarea
-                                        value={editForm.descripcion}
+                                        value={editForm.descripcion || ''}
                                         onChange={(e) => handleInputChange('descripcion', e.target.value)}
                                         rows="2"
                                     />

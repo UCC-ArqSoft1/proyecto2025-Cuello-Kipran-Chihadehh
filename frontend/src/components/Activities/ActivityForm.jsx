@@ -5,7 +5,7 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
         nombre: '',
         categoria: '',
         profesor: '',
-        dia: 'Lunes',
+        dia: '',
         horario: '',
         cupos: 0,
         descripcion: ''
@@ -70,7 +70,7 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
                 nombre: '',
                 categoria: '',
                 profesor: '',
-                dia: 'Lunes',
+                dia: '',
                 horario: '',
                 cupos: 0,
                 descripcion: ''
@@ -122,21 +122,17 @@ const ActivityForm = ({ onSubmit, onCancel }) => {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="dia">Día de la Semana</label>
-                    <select
+                    <label htmlFor="dia">Día</label>
+                    <input
+                        type="number"
                         id="dia"
                         value={formData.dia}
                         onChange={(e) => handleInputChange('dia', e.target.value)}
+                        placeholder="numero del dia"
                         disabled={loading}
                     >
-                        <option value="Lunes">Lunes</option>
-                        <option value="Martes">Martes</option>
-                        <option value="Miércoles">Miércoles</option>
-                        <option value="Jueves">Jueves</option>
-                        <option value="Viernes">Viernes</option>
-                        <option value="Sábado">Sábado</option>
-                        <option value="Domingo">Domingo</option>
-                    </select>
+                    </input>
+                    {errors.dia && <span className="error">{errors.dia}</span>}
                 </div>
 
                 <div className="form-group">
