@@ -139,6 +139,23 @@ func InsertActivity(activity dao.Activity) (dao.Activity, error) {
 	}
 	return activity, nil
 }
+func GetActivitiesByUserID(userID int) (dao.Activities, error) {
+	var activities dao.Activities
+
+	// Realizar una consulta JOIN para obtener las actividades a las que el usuario está inscrito
+	err := DB.
+		Table("activities").
+		Select("activities.*").
+		Joins("JOIN inscriptions ON inscriptions.id_actividad = activities.id_actividad").
+		Where("inscriptions.id_usuario = ?", userID).
+		Scan(&activities).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return activities, nil
+}
 
 // GetActivitiesByCategory obtiene actividades por categoría
 func GetActivitiesByCategory(categoria string) (dao.Activities, error) {
@@ -225,11 +242,35 @@ func GetInscriptionByUserAndActivity(userID int, activityID int) (dao.Inscriptio
 	}
 	return inscription, nil
 }
-
+func GetInscriptionsByUserID(userID int) ([]dao.Inscription, error) {
+	var inscriptions []dao.Inscription
+	if err := DB.Where("ID_usuario = ?", userID).Find(&inscriptions).Error; err != nil {
+		return nil, err
+	}
+	return inscriptions, nil
+}
 func GetAllInscriptions() ([]dao.Inscription, error) {
 	var inscriptions []dao.Inscription
 	if err := DB.Find(&inscriptions).Error; err != nil {
 		return nil, err
 	}
 	return inscriptions, nil
+}
+
+// GetUserActivities devuelve todas las actividades a las que está inscripto un usuario
+func GetUserActivities(userID int) ([]dao.Activity, error) {
+	var activities []dao.Activity
+
+	err := DB.
+		Table("activities").
+		Select("activities.*").
+		Joins("JOIN inscriptions ON inscriptions.id_actividad = activities.id_actividad").
+		Where("inscriptions.id_usuario = ?", userID).
+		Scan(&activities).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return activities, nil
 }

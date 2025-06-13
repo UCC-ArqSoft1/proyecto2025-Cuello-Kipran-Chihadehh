@@ -32,6 +32,10 @@ func Login(username, password string) (domain.User, error) {
 // CreateUser crea un nuevo usuario con contraseña hasheada
 func CreateUser(user domain.User) (domain.User, error) {
 	// Validaciones básicas
+	if user.Name == "" {
+		return domain.User{}, errors.New("name cannot be empty")
+
+	}
 	if user.Username == "" {
 		return domain.User{}, errors.New("username cannot be empty")
 	}
@@ -51,6 +55,7 @@ func CreateUser(user domain.User) (domain.User, error) {
 	// Crear el DAO object
 	userDao := dao.User{
 		Username:     user.Username,
+		Name:         user.Name,
 		PasswordHash: hashedPassword,
 		IsAdmin:      user.IsAdmin,
 	}
@@ -63,6 +68,7 @@ func CreateUser(user domain.User) (domain.User, error) {
 
 	return domain.User{
 		ID:       createdUser.ID,
+		Name:     createdUser.Name,
 		Username: createdUser.Username,
 		Password: "", // No devolvemos la contraseña
 		IsAdmin:  createdUser.IsAdmin,

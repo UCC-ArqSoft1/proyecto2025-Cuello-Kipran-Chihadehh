@@ -160,3 +160,156 @@ func GetAllInscriptions() ([]domain.Inscripcion, error) {
 
 	return result, nil
 }
+func GetInscriptionByUserAndActivity(userID, activityID int) (*domain.Inscripcion, error) {
+	inscription, err := clients.GetInscriptionByUserAndActivity(userID, activityID)
+	if err != nil {
+		return nil, err
+	}
+
+	if inscription.ID_inscripcion == 0 {
+		return nil, errors.New("inscription not found")
+	}
+
+	// Cargar las relaciones (Usuario y Actividad)
+	user, err := clients.GetUserByID(inscription.ID_usuario)
+	if err != nil {
+		return nil, err
+	}
+
+	activity, err := clients.GetActivityByID(inscription.ID_actividad)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Inscripcion{
+		Id:          inscription.ID_inscripcion,
+		UsuarioId:   inscription.ID_usuario,
+		ActividadId: inscription.ID_actividad,
+		Usuario: domain.User{
+			ID:       user.ID,
+			Username: user.Username,
+			IsAdmin:  user.IsAdmin,
+		},
+		Actividad: domain.Activity{
+			ID:          activity.ID_actividad,
+			Name:        activity.Nombre,
+			Profesor:    activity.Profesor,
+			Categoria:   activity.Categoria,
+			Cupos:       activity.Cupos,
+			Description: activity.Descripcion,
+			Dia:         activity.Dia,
+			HoraInicio:  activity.Hora_inicio,
+			HoraFin:     activity.Hora_fin,
+		},
+	}, nil
+}
+
+func GetInscriptionsByUserID(userID int) ([]domain.Inscripcion, error) {
+	inscriptions, err := clients.GetInscriptionsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.Inscripcion
+	for _, inscription := range inscriptions {
+		// Cargar usuario y actividad para cada inscripción
+		user, err := clients.GetUserByID(inscription.ID_usuario)
+		if err != nil {
+			continue // Skip this inscription if user not found
+		}
+		activity, err := clients.GetActivityByID(inscription.ID_actividad)
+		if err != nil {
+			continue // Skip this inscription if activity not found
+		}
+		result = append(result, domain.Inscripcion{
+			Id:          inscription.ID_inscripcion,
+			UsuarioId:   inscription.ID_usuario,
+			ActividadId: inscription.ID_actividad,
+			Usuario: domain.User{
+				ID:       user.ID,
+				Username: user.Username,
+				IsAdmin:  user.IsAdmin,
+			},
+			Actividad: domain.Activity{
+				ID:          activity.ID_actividad,
+				Name:        activity.Nombre,
+				Profesor:    activity.Profesor,
+				Categoria:   activity.Categoria,
+				Cupos:       activity.Cupos,
+				Description: activity.Descripcion,
+				Dia:         activity.Dia,
+				HoraInicio:  activity.Hora_inicio,
+				HoraFin:     activity.Hora_fin,
+			},
+		})
+	}
+	return result, nil
+}
+
+func GetActivitiesByUser(userID int) ([]domain.Activity, error) {
+	inscriptions, err := clients.GetInscriptionsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var activities []domain.Activity
+	for _, inscription := range inscriptions {
+		activity, err := clients.GetActivityByID(inscription.ID_actividad)
+		if err != nil {
+			continue // Skip this inscription if activity not found
+		}
+		activities = append(activities, domain.Activity{
+			ID:          activity.ID_actividad,
+			Name:        activity.Nombre,
+			Profesor:    activity.Profesor,
+			Categoria:   activity.Categoria,
+			Cupos:       activity.Cupos,
+			Description: activity.Descripcion,
+			Dia:         activity.Dia,
+			HoraInicio:  activity.Hora_inicio,
+			HoraFin:     activity.Hora_fin,
+		})
+	}
+	return activities, nil
+}
+func GetMyActivities(userID int) ([]domain.Inscripcion, error) {
+	inscriptions, err := clients.GetInscriptionsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []domain.Inscripcion
+	for _, inscription := range inscriptions {
+		// Cargar usuario y actividad para cada inscripción
+		user, err := clients.GetUserByID(inscription.ID_usuario)
+		if err != nil {
+			continue // Skip this inscription if user not found
+		}
+		activity, err := clients.GetActivityByID(inscription.ID_actividad)
+		if err != nil {
+			continue // Skip this inscription if activity not found
+		}
+		result = append(result, domain.Inscripcion{
+			Id:          inscription.ID_inscripcion,
+			UsuarioId:   inscription.ID_usuario,
+			ActividadId: inscription.ID_actividad,
+			Usuario: domain.User{
+				ID:       user.ID,
+				Username: user.Username,
+				IsAdmin:  user.IsAdmin,
+			},
+			Actividad: domain.Activity{
+				ID:          activity.ID_actividad,
+				Name:        activity.Nombre,
+				Profesor:    activity.Profesor,
+				Categoria:   activity.Categoria,
+				Cupos:       activity.Cupos,
+				Description: activity.Descripcion,
+				Dia:         activity.Dia,
+				HoraInicio:  activity.Hora_inicio,
+				HoraFin:     activity.Hora_fin,
+			},
+		})
+	}
+	return result, nil
+}

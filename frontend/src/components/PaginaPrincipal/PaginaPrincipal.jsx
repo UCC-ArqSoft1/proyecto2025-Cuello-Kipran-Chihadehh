@@ -4,6 +4,7 @@ import ActivityList from '../Activities/ActivityList';
 import ActivityForm from '../Activities/ActivityForm';
 import './PaginaPrincipal.css';
 import UserList from '../users/UserList';
+import MyActivities from '../Activities/myactivities';
 
 
 const PaginaPrincipal = () => {
@@ -207,11 +208,12 @@ const PaginaPrincipal = () => {
             />
           </div>
         );
-      case 'users':
+      case 'mis-activities':
         return (
-          <div className="users-section">
-            <h2>Gestión de Usuarios</h2>
-            <UserList users={users} />
+          <div className="mis-activities-section">
+            <h2>Mis Actividades</h2>
+            <p>Actividades en las que estás inscrito:</p>
+            <MyActivities authenticatedFetch={authenticatedFetch || makeAuthenticatedRequest} />
           </div>
         );
       default:
@@ -245,11 +247,11 @@ const PaginaPrincipal = () => {
             >
               Actividades
             </button>
-            <button
-              onClick={() => setActiveSection('users')}
-              className={`nav-button ${activeSection === 'users' ? 'active' : ''}`}
+
+            <button onClick={() => setActiveSection('mis-activities')}
+              className={`nav-button ${activeSection === 'mis-activities' ? 'active' : ''}`}
             >
-              Usuarios
+              Mis Actividades
             </button>
           </nav>
         </div>
