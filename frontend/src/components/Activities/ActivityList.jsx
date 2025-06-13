@@ -1,27 +1,50 @@
 import React, { useState } from 'react'
+import './Actividades.css';
 
 const ActivityList = ({ activities, onUpdate, onDelete }) => {
     const [editingActivity, setEditingActivity] = useState(null)
     const [editForm, setEditForm] = useState({})
+    const [textosVisibles, setTextosVisibles] = useState({})
 
     // Debug: Ver qué datos están llegando
     console.log('ActivityList - activities:', activities)
     console.log('ActivityList - activities length:', activities?.length)
 
+    // Alternar visibilidad del texto oculto
+    const toggleTextoVisible = (id) => {
+        setTextosVisibles(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }))
+    }
+
     const handleEdit = (activity) => {
-        setEditingActivity(activity.id_actividad)
+        // Verificar que el activity tenga id_actividad definido
+        if (!activity.id) {
+            console.error('Activity sin id_actividad:', activity)
+            alert('Error: No se puede editar una actividad sin ID válido')
+            return
+        }
+
+        setEditingActivity(activity.id)
         setEditForm({
-            nombre: activity.name,
-            categoria: activity.Categoria,
-            profesor: activity.profesor,
-            dia: activity.dia,
-            horario: activity.hora_inicio,
-            cupos: activity.cupos,
+            id_actividad: activity.id,
+            nombre: activity.name || '',
+            categoria: activity.categoria || '',
+            profesor: activity.profesor || '',
+            dia: activity.dia || '',
+            horario: activity.hora_inicio || '',
+            cupos: activity.cupos || 0,
             descripcion: activity.description || ''
         })
     }
 
     const handleSave = async () => {
+        if (!editingActivity) {
+            console.error('No hay actividad en edición')
+            return
+        }
+
         const success = await onUpdate(editingActivity, editForm)
         if (success) {
             setEditingActivity(null)
@@ -34,9 +57,17 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
         setEditForm({})
     }
 
-    const handleDelete = async (id) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar esta actividad?')) {
-            await onDelete(id)
+    const handleDelete = async (activity) => {
+        // Verificar que la actividad tenga id_actividad definido
+        if (!activity.id) {
+            console.error('Activity sin id_actividad:', activity)
+            alert('Error: No se puede eliminar una actividad sin ID válido')
+            return
+        }
+
+        const activityName = activity.name || 'Sin nombre'
+        if (window.confirm(`¿Estás seguro de que quieres eliminar la actividad "${activityName}"?`)) {
+            await onDelete(activity.id, activityName)
         }
     }
 
@@ -48,133 +79,226 @@ const ActivityList = ({ activities, onUpdate, onDelete }) => {
     }
 
     if (!activities || activities.length === 0) {
-        return <div>No hay actividades disponibles</div>
+        return (
+            <div className="actividades-container">
+                <div className="no-activities-message">
+                    No hay actividades disponibles
+                </div>
+            </div>
+        )
     }
 
     return (
-        <div className="activity-list">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Profesor</th>
-                        <th>Día</th>
-                        <th>Horario</th>
-                        <th>Cupos</th>
-                        <th>Descripción</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {activities.map((activity, index) => (
-                        <tr key={activity.id_actividad || `activity-${index}`}>
-                            <td>{activity.id_actividad || 'N/A'}</td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <input
-                                        type="text"
-                                        value={editForm.nombre || ''}
-                                        onChange={(e) => handleInputChange('nombre', e.target.value)}
-                                    />
-                                ) : (
-                                    activity.nombre || 'Sin nombre'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <input
-                                        type="text"
-                                        value={editForm.categoria || ''}
-                                        onChange={(e) => handleInputChange('categoria', e.target.value)}
-                                    />
-                                ) : (
-                                    activity.categoria || 'Sin categoría'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <input
-                                        type="text"
-                                        value={editForm.profesor || ''}
-                                        onChange={(e) => handleInputChange('profesor', e.target.value)}
-                                    />
-                                ) : (
-                                    activity.profesor || 'Sin profesor'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <select
-                                        value={editForm.dia || ''}
-                                        onChange={(e) => handleInputChange('dia', e.target.value)}
-                                    >
-                                        <option value="">Seleccionar día</option>
-                                        <option value="Lunes">Lunes</option>
-                                        <option value="Martes">Martes</option>
-                                        <option value="Miércoles">Miércoles</option>
-                                        <option value="Jueves">Jueves</option>
-                                        <option value="Viernes">Viernes</option>
-                                        <option value="Sábado">Sábado</option>
-                                        <option value="Domingo">Domingo</option>
-                                    </select>
-                                ) : (
-                                    activity.dia || 'Sin día'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <input
-                                        type="text"
-                                        value={editForm.horario || ''}
-                                        onChange={(e) => handleInputChange('horario', e.target.value)}
-                                        placeholder="HH:MM - HH:MM"
-                                    />
-                                ) : (
-                                    activity.horario || 'Sin horario'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <input
-                                        type="number"
-                                        value={editForm.cupos || ''}
-                                        onChange={(e) => handleInputChange('cupos', parseInt(e.target.value) || 0)}
-                                        min="0"
-                                    />
-                                ) : (
-                                    activity.cupos || '0'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <textarea
-                                        value={editForm.descripcion || ''}
-                                        onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                                        rows="2"
-                                    />
-                                ) : (
-                                    activity.descripcion || 'Sin descripción'
-                                )}
-                            </td>
-                            <td>
-                                {editingActivity === activity.id_actividad ? (
-                                    <div className="action-buttons">
-                                        <button onClick={handleSave}>Guardar</button>
-                                        <button onClick={handleCancel}>Cancelar</button>
-                                    </div>
-                                ) : (
-                                    <div className="action-buttons">
-                                        <button onClick={() => handleEdit(activity)}>Editar</button>
-                                        <button onClick={() => handleDelete(activity.id_actividad)}>Eliminar</button>
-                                    </div>
-                                )}
-                            </td>
+        <div className="actividades-container">
+            <div className="table-container">
+                <table className="activities-table">
+                    <thead>
+                        <tr>
+
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Profesor</th>
+                            <th>Día</th>
+                            <th>Hora de inicio</th>
+                            <th>Cupos</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {activities.map((activity, index) => {
+                            // Verificar que la actividad tenga un ID válido
+                            const activityId = activity.id || `temp-${index}`
+                            const isEditing = editingActivity === activity.id_actividad
+                            const esVisible = textosVisibles[activity.id_actividad]
+
+                            // Si no tiene id_actividad válido, mostrar advertencia en consola
+                            if (!activity.id) {
+                                console.warn(`Actividad en índice ${index} sin id_actividad:`, activity)
+                            }
+
+                            return (
+                                <tr key={activityId} className={!activity.id ? 'invalid-activity' : ''}>
+                                    <td className="table-cell">
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                className="edit-input"
+                                                value={editForm.nombre || ''}
+                                                onChange={(e) => handleInputChange('nombre', e.target.value)}
+                                                placeholder="Nombre de la actividad"
+                                            />
+                                        ) : (
+                                            <span className="cell-content">
+                                                {activity.name || 'Sin nombre'}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell">
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                className="edit-input"
+                                                value={editForm.categoria || ''}
+                                                onChange={(e) => handleInputChange('categoria', e.target.value)}
+                                                placeholder="Categoría"
+                                            />
+                                        ) : (
+                                            <span className="cell-content">
+                                                {activity.categoria || 'Sin categoría'}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell">
+                                        {isEditing ? (
+                                            <input
+                                                type="text"
+                                                className="edit-input"
+                                                value={editForm.profesor || ''}
+                                                onChange={(e) => handleInputChange('profesor', e.target.value)}
+                                                placeholder="Profesor"
+                                            />
+                                        ) : (
+                                            <span className="cell-content">
+                                                {activity.profesor || 'Sin profesor'}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell">
+                                        {isEditing ? (
+                                            <input
+                                                type="number"
+                                                className="edit-select"
+                                                value={editForm.dia || ''}
+                                                onChange={(e) => handleInputChange('dia', e.target.value)}
+                                            >
+                                            </input>
+                                        ) : (
+                                            <span className="cell-content">
+                                                {activity.dia || 'Sin día'}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell">
+                                        {isEditing ? (
+                                            <input
+                                                type="time"
+                                                className="edit-input"
+                                                value={editForm.hora_inicio || ''}
+                                                onChange={(e) => handleInputChange('horario', e.target.value)}
+                                            />
+                                        ) : (
+                                            <span className="cell-content">
+                                                {activity.hora_inicio || 'Sin horario'}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell">
+                                        {isEditing ? (
+                                            <input
+                                                type="number"
+                                                className="edit-input"
+                                                value={editForm.cupos || ''}
+                                                onChange={(e) => handleInputChange('cupos', parseInt(e.target.value) || 0)}
+                                                min="0"
+                                                placeholder="0"
+                                            />
+                                        ) : (
+                                            <span className="cell-content">
+                                                {activity.cupos || '0'}
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell descripcion-cell">
+                                        {isEditing ? (
+                                            <textarea
+                                                className="edit-textarea"
+                                                value={editForm.descripcion || ''}
+                                                onChange={(e) => handleInputChange('descripcion', e.target.value)}
+                                                rows="2"
+                                                placeholder="Descripción de la actividad"
+                                            />
+                                        ) : (
+                                            <div className="descripcion-section">
+                                                <button
+                                                    className="toggle-descripcion-btn"
+                                                    onClick={() => toggleTextoVisible(activity.id_actividad)}
+                                                    type="button"
+                                                >
+                                                    {esVisible ? '🙈 Ocultar' : '👁️ Ver'}
+                                                </button>
+                                                {esVisible && (
+                                                    <div className="descripcion-visible">
+                                                        <p className="descripcion-texto">
+                                                            {activity.description || 'Sin descripción'}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </td>
+
+                                    <td className="table-cell actions-cell">
+                                        {isEditing ? (
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="accion-btn accion-btn-save"
+                                                    onClick={handleSave}
+                                                >
+                                                    ✅ Guardar
+                                                </button>
+                                                <button
+                                                    className="accion-btn accion-btn-cancel"
+                                                    onClick={handleCancel}
+                                                >
+                                                    ❌ Cancelar
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="action-buttons">
+                                                <button
+                                                    className="accion-btn accion-btn-edit"
+                                                    onClick={() => handleEdit(activity)}
+                                                    disabled={!activity.id}
+                                                    title={!activity.id ? 'Actividad sin ID válido' : 'Editar actividad'}
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button
+                                                    className="accion-btn accion-btn-delete"
+                                                    onClick={() => handleDelete(activity)}
+                                                    disabled={!activity.id}
+                                                    title={!activity.id ? 'Actividad sin ID válido' : 'Eliminar actividad'}
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Información de debug (solo en desarrollo) */}
+            {process.env.NODE_ENV === 'development' && (
+                <div className="debug-panel">
+                    <details>
+                        <summary>🔧 Información de Debug</summary>
+                        <div className="debug-content">
+                            <p><strong>Total actividades:</strong> {activities.length}</p>
+                        </div>
+                    </details>
+                </div>
+            )}
         </div>
     )
 }

@@ -5,6 +5,7 @@ import ActivityForm from '../Activities/ActivityForm';
 import './PaginaPrincipal.css';
 import UserList from '../users/UserList';
 
+
 const PaginaPrincipal = () => {
   const { user, logout, authenticatedFetch } = useAuth();
   const [activeSection, setActiveSection] = useState('dashboard');
