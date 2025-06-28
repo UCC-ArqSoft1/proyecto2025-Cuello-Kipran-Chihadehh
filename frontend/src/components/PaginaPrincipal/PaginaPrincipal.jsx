@@ -19,7 +19,7 @@ const PaginaPrincipal = () => {
 
   // Función alternativa si authenticatedFetch no funciona
   const makeAuthenticatedRequest = async (url, options = {}) => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = document.cookie.token;
 
     return fetch(url, {
       ...options,
@@ -172,7 +172,11 @@ const PaginaPrincipal = () => {
     try {
       const fetchFunction = authenticatedFetch || makeAuthenticatedRequest;
       const response = await fetchFunction(`http://localhost:8080/activities/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        }
       });
       if (response.ok) {
         await loadActivities();

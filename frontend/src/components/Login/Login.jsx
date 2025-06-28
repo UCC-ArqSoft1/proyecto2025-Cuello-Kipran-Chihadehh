@@ -27,8 +27,8 @@ const Login = () => {
       const data = await response.json();
 
       // ✅ Guardar en localStorage como espera AuthContext
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user)); // asegurate de que tu backend devuelva "user"
+      document.cookie = `token=${data.user.token}`;
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       navigate("/dashboard");
     } catch {

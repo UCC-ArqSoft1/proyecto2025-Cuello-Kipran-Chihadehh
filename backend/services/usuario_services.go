@@ -3,6 +3,7 @@ package services
 import (
 	"backend/clients"
 	"backend/domain"
+	"backend/utils"
 	"errors"
 	"fmt"
 )
@@ -50,11 +51,18 @@ func ValidateUserCredentials(username, password string) (domain.User, error) {
 		return domain.User{}, errors.New("invalid credentials")
 	}
 
+	token, err := utils.GenerateJWT(userDao.ID)
+	fmt.Printf("Generated token for user %s: %s\n", userDao.Username, token)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to generate token: %w", err)
+	}
+
 	return domain.User{
 		ID:       userDao.ID,
 		Username: userDao.Username,
 		Password: "", // No devolvemos la contraseña
 		IsAdmin:  userDao.IsAdmin,
+		Token:    token,
 	}, nil
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"backend/clients"
 	"backend/controllers"
+	"backend/utils"
 	"log"
 	"time"
 
@@ -47,8 +48,8 @@ func main() {
 	// User routes
 	router.GET("/users", controllers.GetAllUsers)
 	router.GET("/users/:id", controllers.GetUserByID)
-	router.PUT("/users/:id", controllers.UpdateUser)
-	router.DELETE("/users/:id", controllers.DeleteUser)
+	router.PUT("/users/:id", utils.JwtAuthMiddleware(), controllers.UpdateUser)
+	router.DELETE("/users/:id", utils.JwtAuthMiddleware(), controllers.DeleteUser)
 	// Eliminar duplicados si quieres:
 	// router.POST("/users/login", controllers.Login)
 	// router.POST("/users/register", controllers.Register)
@@ -58,7 +59,7 @@ func main() {
 	router.GET("/activities/:id", controllers.GetActivityByID)
 	router.POST("/activities", controllers.CreateActivity)
 	router.PUT("/activities/:id", controllers.UpdateActivity)
-	router.DELETE("/activities/:id", controllers.DeleteActivity)
+	router.DELETE("/activities/:id", utils.JwtAuthMiddleware(), controllers.DeleteActivity)
 
 	// Activity filters and search
 	router.GET("/activities/category/:categoria", controllers.GetActivitiesByCategory)
