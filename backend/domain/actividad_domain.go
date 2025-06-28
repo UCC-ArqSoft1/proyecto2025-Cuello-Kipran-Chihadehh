@@ -7,7 +7,7 @@ type Activity struct {
 	Cupos       int    `json:"cupos"`       // Ej: 10, 20
 	Categoria   string `json:"categoria"`   // Ej: "Aeróbico", "Fuerza"
 	Description string `json:"description"` // Opcional
-	Dia         int    `json:"dia"`         // Días y horarios en que se repite la actividad
+	Dia         int    `json:"dia"`         // Días en que se repite la actividad
 	HoraInicio  string `json:"hora_inicio"` // Ej: "08:00", "10:30"
 	HoraFin     string `json:"hora_fin"`    // Ej: "09:00", "11:30"
 }

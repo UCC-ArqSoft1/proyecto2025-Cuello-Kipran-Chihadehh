@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import './Actividades.css';
 
+// Helper function para convertir número de día a nombre
+const getDayName = (dayNumber) => {
+    const days = {
+        1: 'Lunes',
+        2: 'Martes',
+        3: 'Miércoles',
+        4: 'Jueves',
+        5: 'Viernes',
+        6: 'Sábado',
+        7: 'Domingo'
+    };
+    return days[dayNumber] || 'Día inválido';
+};
+
 const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
     const [editingActivity, setEditingActivity] = useState(null);
     const [editForm, setEditForm] = useState({});
@@ -20,7 +34,7 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
             nombre: activity.name || '',
             categoria: activity.categoria || '',
             profesor: activity.profesor || '',
-            dia: activity.dia || '',
+            dia: activity.dia || 1,
             horario: activity.hora_inicio || '',
             cupos: activity.cupos || 0,
             descripcion: activity.description || ''
@@ -138,8 +152,19 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                                     ) : activity.profesor}</td>
 
                                     <td>{isEditing ? (
-                                        <input type="number" value={editForm.dia || ''} onChange={(e) => handleInputChange('dia', e.target.value)} />
-                                    ) : activity.dia}</td>
+                                        <select
+                                            value={editForm.dia || 1}
+                                            onChange={(e) => handleInputChange('dia', parseInt(e.target.value))}
+                                        >
+                                            <option value={1}>Lunes</option>
+                                            <option value={2}>Martes</option>
+                                            <option value={3}>Miércoles</option>
+                                            <option value={4}>Jueves</option>
+                                            <option value={5}>Viernes</option>
+                                            <option value={6}>Sábado</option>
+                                            <option value={7}>Domingo</option>
+                                        </select>
+                                    ) : getDayName(activity.dia)}</td>
 
                                     <td>{isEditing ? (
                                         <input type="time" value={editForm.horario || ''} onChange={(e) => handleInputChange('horario', e.target.value)} />

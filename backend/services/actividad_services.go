@@ -70,7 +70,7 @@ func InsertActivity(activity domain.Activity) (domain.Activity, error) {
 	if activity.Description == "" {
 		return domain.Activity{}, errors.New("description cannot be empty")
 	}
-	if activity.Dia <= 0 {
+	if activity.Dia <= 0 && activity.Dia > 7 {
 		return domain.Activity{}, errors.New("dia cannot be empty or less than 1")
 	}
 	if activity.Cupos <= 0 {
