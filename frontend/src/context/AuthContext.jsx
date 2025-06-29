@@ -40,15 +40,36 @@ export const AuthProvider = ({ children }) => {
 
     // Función para cerrar sesión
     const logout = () => {
-        setUser(null)
-        setToken(null)
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-    }
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+    };
 
     // Función para obtener el token
     const getToken = () => {
         return localStorage.getItem('authToken');
+    };
+
+    // Función corregida para obtener el ID del usuario
+    const getUserId = () => {
+        if (user && user.id) {
+            return user.id;
+        }
+
+        // Como fallback, intentar obtener del localStorage
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            try {
+                const parsedUser = JSON.parse(savedUser);
+                return parsedUser.id;
+            } catch (error) {
+                console.error('Error parsing saved user:', error);
+                return null;
+            }
+        }
+
+        return null;
     };
 
     const value = {
@@ -57,7 +78,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
-        getToken
+        getToken,
+        getUserId
     };
 
     return (

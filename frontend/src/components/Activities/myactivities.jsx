@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Actividades.css";
+import { AuthProvider } from "../../context/AuthContext";
 
 // Helper function para convertir número de día a nombre
 const getDayName = (dayNumber) => {
@@ -20,17 +21,77 @@ const MyActivities = ({ authenticatedFetch }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedActivity, setSelectedActivity] = useState(null);
-
+    const [userId, setUserId] = useState(null);
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                const response = await authenticatedFetch("http://localhost:8080/inscriptions/myactivities");
+                console.log("Fetching user activities...");
+
+                // Obtener el ID del usuario
+                const userId = getUserId();
+
+                // Verificar que tenemos el ID del usuario
+                if (!userId) {
+                    throw new Error("No se pudo obtener el ID del usuario");
+                }
+
+                const response = await authenticatedFetch(`http://localhost:8080/inscriptions/myactivities/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                // Verificar si la respuesta es JSON válido
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("La respuesta del servidor no es JSON válido");
+                }
+
                 const data = await response.json();
-                setActivities(data.activities || data);
-            } catch (err) {
+                console.log("Parsed data:", data);
+
+                // La respuesta debería ser un array de InscripcionResponse
+                let activitiesData = [];
+                if (Array.isArray(data)) {
+                    // Mapear los datos para que coincidan con lo que espera el frontend
+                    activitiesData = data.map(inscription => ({
+                        // Datos de la inscripción
+                        id: inscription.Id,
+                        usuario_id: inscription.UsuarioId,
+                        actividad_id: inscription.ActividadId,
+
+                        // Datos de la actividad (desde inscription.Actividad)
+                        name: inscription.Actividad?.Name || 'Sin nombre',
+                        nombre: inscription.Actividad?.Name || 'Sin nombre', // Para compatibilidad
+                        profesor: inscription.Actividad?.Profesor || 'No asignado',
+                        categoria: inscription.Actividad?.Categoria || 'Sin categoría',
+                        cupos: inscription.Actividad?.Cupos || 0,
+                        descripcion: inscription.Actividad?.Description || 'Sin descripción',
+                        dia: inscription.Actividad?.Dia || 0,
+                        hora_inicio: inscription.Actividad?.HoraInicio || 'No especificado',
+                        hora_fin: inscription.Actividad?.HoraFin || 'No especificado',
+
+                        // Datos del usuario
+                        usuario: inscription.Usuario
+                    }));
+                } else if (data.message) {
+                    // Manejar respuestas de error del servidor
+                    throw new Error(data.message);
+                } else {
+                    console.warn("Estructura de datos no reconocida:", data);
+                    activitiesData = [];
+                }
+
+                setActivities(activitiesData);
+                console.log("Activities set:", activitiesData);
+
+            }
+            catch (err) {
                 console.error("Error fetching activities:", err);
                 setError(err.message);
             } finally {
@@ -49,10 +110,39 @@ const MyActivities = ({ authenticatedFetch }) => {
         setSelectedActivity(null);
     };
 
+    const handleUninscribe = async (inscriptionId) => {
+        if (!window.confirm("¿Estás seguro de que quieres desincribirte de esta actividad?")) {
+            return;
+        }
+
+        try {
+            // Usar el ID de la inscripción, no de la actividad
+            const response = await authenticatedFetch(`http://localhost:8080/inscriptions/${inscriptionId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            // Actualizar la lista de actividades
+            setActivities(prev => prev.filter(activity => activity.id !== inscriptionId));
+            setSelectedActivity(null);
+
+            alert("Te has desinscrito exitosamente de la actividad");
+        } catch (err) {
+            console.error("Error uninscribing:", err);
+            alert("Error al desincribirse: " + err.message);
+        }
+    };
+
     if (loading) {
         return (
             <div className="my-activities-container">
-                <div className="loading-message">Cargando actividades...</div>
+                <div className="loading-message">
+                    <div className="spinner"></div>
+                    <p>Cargando tus actividades...</p>
+                </div>
             </div>
         );
     }
@@ -60,27 +150,58 @@ const MyActivities = ({ authenticatedFetch }) => {
     if (error) {
         return (
             <div className="my-activities-container">
-                <div className="error-message">Error: {error}</div>
+                <div className="error-message">
+                    <h3>⚠️ Error al cargar actividades</h3>
+                    <p>{error}</p>
+                    <button
+                        className="retry-btn"
+                        onClick={() => window.location.reload()}
+                    >
+                        Reintentar
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
         <div className="my-activities-container">
-            <h2 className="my-activities-title">Mis Actividades</h2>
+            <div className="header-section">
+                <h2 className="my-activities-title">Mis Actividades Inscritas</h2>
+                <div className="activities-count">
+                    {activities.length > 0 && (
+                        <span className="count-badge">
+                            {activities.length} actividad{activities.length !== 1 ? 'es' : ''}
+                        </span>
+                    )}
+                </div>
+            </div>
 
             {activities.length === 0 ? (
                 <div className="no-activities">
-                    <p>No tienes actividades inscritas.</p>
+                    <div className="empty-state">
+                        <div className="empty-icon">📋</div>
+                        <h3>No tienes actividades inscritas</h3>
+                        <p>¡Explora y únete a las actividades disponibles!</p>
+                        <button
+                            className="browse-activities-btn"
+                            onClick={() => window.location.href = '/activities'}
+                        >
+                            Ver actividades disponibles
+                        </button>
+                    </div>
                 </div>
             ) : (
                 <>
                     <div className="activities-grid">
                         {activities.map((activity) => (
-                            <div key={activity.id} className="activity-card">
+                            <div key={activity.id} className="activity-card enrolled">
+                                <div className="enrollment-badge">
+                                    <span>✓ Inscrito</span>
+                                </div>
                                 <div className="activity-card-content">
                                     <h3 className="activity-name">
-                                        {activity.nombre || activity.name}
+                                        {activity.name || activity.nombre || 'Actividad sin nombre'}
                                     </h3>
                                     <div className="activity-basic-info">
                                         <div className="activity-day">
@@ -89,16 +210,24 @@ const MyActivities = ({ authenticatedFetch }) => {
                                         </div>
                                         <div className="activity-time">
                                             <span className="info-label">🕐</span>
-                                            <span>{activity.hora_inicio}</span>
+                                            <span>{activity.hora_inicio || 'No especificado'}</span>
                                         </div>
+                                        {activity.profesor && (
+                                            <div className="activity-teacher">
+                                                <span className="info-label">👨‍🏫</span>
+                                                <span>{activity.profesor}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <button
-                                    className="view-more-btn"
-                                    onClick={() => handleShowDetails(activity)}
-                                >
-                                    Ver más
-                                </button>
+                                <div className="card-actions">
+                                    <button
+                                        className="view-more-btn"
+                                        onClick={() => handleShowDetails(activity)}
+                                    >
+                                        Ver detalles
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -112,40 +241,89 @@ const MyActivities = ({ authenticatedFetch }) => {
                                     <button
                                         className="close-btn"
                                         onClick={handleCloseDetails}
+                                        aria-label="Cerrar"
                                     >
                                         ✕
                                     </button>
                                 </div>
                                 <div className="modal-body">
-                                    <div className="detail-row">
-                                        <span className="detail-label">Categoría:</span>
-                                        <span className="detail-value">{selectedActivity.categoria}</span>
+                                    <div className="enrollment-status">
+                                        <span className="status-badge enrolled">
+                                            ✓ Estás inscrito en esta actividad
+                                        </span>
                                     </div>
-                                    <div className="detail-row">
-                                        <span className="detail-label">Profesor:</span>
-                                        <span className="detail-value">{selectedActivity.profesor}</span>
-                                    </div>
+
+                                    {selectedActivity.categoria && (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Categoría:</span>
+                                            <span className="detail-value">{selectedActivity.categoria}</span>
+                                        </div>
+                                    )}
+
+                                    {selectedActivity.profesor && (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Profesor:</span>
+                                            <span className="detail-value">{selectedActivity.profesor}</span>
+                                        </div>
+                                    )}
+
                                     <div className="detail-row">
                                         <span className="detail-label">Día:</span>
                                         <span className="detail-value">{getDayName(selectedActivity.dia)}</span>
                                     </div>
+
                                     <div className="detail-row">
                                         <span className="detail-label">Horario:</span>
                                         <span className="detail-value">
-                                            {selectedActivity.hora_inicio}
+                                            {selectedActivity.hora_inicio || 'No especificado'}
                                             {selectedActivity.hora_fin && ` - ${selectedActivity.hora_fin}`}
                                         </span>
                                     </div>
-                                    <div className="detail-row">
-                                        <span className="detail-label">Cupos:</span>
-                                        <span className="detail-value">{selectedActivity.cupos}</span>
-                                    </div>
-                                    {selectedActivity.description && (
-                                        <div className="detail-row description">
-                                            <span className="detail-label">Descripción:</span>
-                                            <p className="detail-description">{selectedActivity.description}</p>
+
+                                    {selectedActivity.cupos && (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Cupos totales:</span>
+                                            <span className="detail-value">{selectedActivity.cupos}</span>
                                         </div>
                                     )}
+
+                                    {selectedActivity.ubicacion && (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Ubicación:</span>
+                                            <span className="detail-value">{selectedActivity.ubicacion}</span>
+                                        </div>
+                                    )}
+
+                                    {selectedActivity.descripcion && (
+                                        <div className="detail-row description">
+                                            <span className="detail-label">Descripción:</span>
+                                            <p className="detail-description">{selectedActivity.descripcion}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedActivity.fecha_inscripcion && (
+                                        <div className="detail-row">
+                                            <span className="detail-label">Fecha de inscripción:</span>
+                                            <span className="detail-value">
+                                                {new Date(selectedActivity.fecha_inscripcion).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button
+                                        className="uninscribe-btn"
+                                        onClick={() => handleUninscribe(selectedActivity.id)}
+                                    >
+                                        Desincribirse
+                                    </button>
+                                    <button
+                                        className="close-modal-btn"
+                                        onClick={handleCloseDetails}
+                                    >
+                                        Cerrar
+                                    </button>
                                 </div>
                             </div>
                         </div>

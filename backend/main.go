@@ -72,7 +72,7 @@ func main() {
 	//Inscriptions routes
 	router.GET("/inscription/:id", controllers.GetInscriptionByID)
 	router.POST("/inscription", controllers.CreateInscription)
-	router.GET("/inscriptions/myactivities", controllers.GetMyActivities)
+	router.GET("/inscriptions/myactivities", utils.JwtAuthMiddleware(), controllers.GetMyActivities)
 	// ========================================
 	// 4. INICIAR SERVIDOR
 	// ========================================

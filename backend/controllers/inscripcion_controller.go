@@ -202,8 +202,73 @@ func GetActivitiesByUser(c *gin.Context) {
 		"message": "GetActivitiesByUser service method not implemented yet",
 	})
 }
-func GetMyActivities(c *gin.Context) {
 
+// GetMyActivities maneja la obtención de las actividades del usuario autenticado
+func GetMyActivities(c *gin.Context) {
+	// Obtener el ID del usuario del contexto (asumiendo que tienes middleware de autenticación)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	// Convertir a int si es necesario
+	var id int
+	switch v := userID.(type) {
+	case int:
+		id = v
+	case float64:
+		id = int(v)
+	case string:
+		var err error
+		id, err = strconv.Atoi(v)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+			return
+		}
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+
+	// Obtener las inscripciones del usuario
+	inscriptions, err := services.GetMyActivities(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get user activities",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// Convertir a response format
+	var responses []domain.InscripcionResponse
+	for _, inscription := range inscriptions {
+		response := domain.InscripcionResponse{
+			Id:          inscription.Id,
+			UsuarioId:   inscription.UsuarioId,
+			ActividadId: inscription.ActividadId,
+			Usuario: domain.UserResponse{
+				ID:       inscription.Usuario.ID,
+				Username: inscription.Usuario.Username,
+				IsAdmin:  inscription.Usuario.IsAdmin,
+			},
+			Actividad: domain.ActivityResponse{
+				ID:          inscription.Actividad.ID,
+				Name:        inscription.Actividad.Name,
+				Profesor:    inscription.Actividad.Profesor,
+				Categoria:   inscription.Actividad.Categoria,
+				Cupos:       inscription.Actividad.Cupos,
+				Description: inscription.Actividad.Description,
+				Dia:         inscription.Actividad.Dia,
+				HoraInicio:  inscription.Actividad.HoraInicio,
+				HoraFin:     inscription.Actividad.HoraFin,
+			},
+		}
+		responses = append(responses, response)
+	}
+
+	c.JSON(http.StatusOK, responses)
 }
 
 // GetInscriptions maneja la obtención de todas las inscripciones (opcional)

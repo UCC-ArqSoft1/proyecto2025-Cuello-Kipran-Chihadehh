@@ -207,7 +207,7 @@ const PaginaPrincipal = () => {
         return (
           <div className="dashboard">
             <h2>Dashboard</h2>
-            <p>Bienvenido al sistema de gestión, {user?.username}</p>
+            <p>, {user?.username}</p>
             <div className="stats-grid">
               <div className="stat-card">
                 <h3>Total Actividades</h3>
@@ -217,10 +217,7 @@ const PaginaPrincipal = () => {
                 <h3>Total Usuarios</h3>
                 <p>{users.length}</p>
               </div>
-              <div className="stat-card">
-                <h3>Sistema</h3>
-                <p>Operativo</p>
-              </div>
+
             </div>
           </div>
         );

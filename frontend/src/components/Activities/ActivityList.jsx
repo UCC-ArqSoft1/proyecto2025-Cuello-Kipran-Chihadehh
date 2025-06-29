@@ -41,7 +41,7 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
             categoria: activity.categoria || '',
             profesor: activity.profesor || '',
             dia: activity.dia || 1,
-            horario: activity.hora_inicio || '',
+            horario: activity.hora_inicio + '' + activity.hora_fin || '',
             cupos: activity.cupos || 0,
             descripcion: activity.description || ''
         });
@@ -150,7 +150,7 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                                     </div>
                                     <div className="activity-time">
                                         <span className="info-label">🕐</span>
-                                        <span>{activity.hora_inicio}</span>
+                                        <span>{activity.hora_inicio + 'hs-' + activity.hora_fin + 'hs'}</span>
                                     </div>
                                     <div className="activity-spots">
                                         <span className="info-label">👥</span>
@@ -160,7 +160,7 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                             </div>
                             <div className="activity-card-actions">
                                 <button
-                                    className="accion-btn accion-btn-inscribe"
+                                    className="accion-btn-accion-btn-inscribe"
                                     onClick={() => handleInscribe(activity.id)}
                                     disabled={!activity.id || isInscribing || activity.cupos <= 0}
                                 >
@@ -242,7 +242,7 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                                         <label>Horario:</label>
                                         <input
                                             type="time"
-                                            value={editForm.horario || ''}
+                                            value={editForm.horario + 'hs' || ''}
                                             onChange={(e) => handleInputChange('horario', e.target.value)}
                                             className="edit-input"
                                         />
@@ -290,7 +290,7 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                                     </div>
                                     <div className="detail-row">
                                         <span className="detail-label">Horario:</span>
-                                        <span className="detail-value">{selectedActivity.hora_inicio}</span>
+                                        <span className="detail-value">{selectedActivity.hora_inicio + 'hs a ' + selectedActivity.hora_fin + 'hs'}</span>
                                     </div>
                                     <div className="detail-row">
                                         <span className="detail-label">Cupos:</span>

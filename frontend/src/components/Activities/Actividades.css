@@ -136,7 +136,7 @@
 .close-btn {
     background: none;
     border: none;
-    color: #ccc;
+    color: #e91e63;
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0.5rem;
@@ -305,4 +305,39 @@
         padding: 0.5rem 0.8rem;
         min-width: 70px;
     }
+}
+
+.search-bar-actividades {
+    width: 100%;
+    border: 3px solid #e91e63;
+    border-right: none;
+    padding: 5px;
+    height: 20px;
+    border-radius: 5px 0 0 5px;
+    margin-bottom: 1.5rem;
+}
+
+.search-input-actividades {
+    width: 100%;
+    border: none;
+    background-color: transparent;
+    color: #ffffff;
+    font-size: 1rem;
+    padding: 5px;
+    padding: 5px;
+    height: 20px;
+}
+
+.accion-btn-accion-btn-inscribe {
+    background-color: #e91e63;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
 }
