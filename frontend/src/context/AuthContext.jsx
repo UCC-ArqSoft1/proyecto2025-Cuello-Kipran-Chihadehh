@@ -24,14 +24,23 @@ export const AuthProvider = ({ children }) => {
         const savedUser = localStorage.getItem('user');
 
         if (token && savedUser) {
-            setUser(JSON.parse(savedUser));
-            setIsAuthenticated(true);
+            try {
+                const parsedUser = JSON.parse(savedUser);
+                setUser(parsedUser);
+                setIsAuthenticated(true);
+            } catch (error) {
+                console.error('Error parsing saved user:', error);
+                // Limpiar datos corruptos
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+            }
         }
         setLoading(false);
     }, []);
 
     // Función para iniciar sesión
     const login = (userData, token) => {
+        console.log('Login called with:', { userData, token }); // Debug
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
@@ -44,11 +53,27 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
+        // También limpiar cookies si las usas
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     };
 
     // Función para obtener el token
     const getToken = () => {
         return localStorage.getItem('authToken');
+    };
+
+    // Función para hacer peticiones autenticadas
+    const authenticatedFetch = async (url, options = {}) => {
+        const token = getToken();
+
+        return fetch(url, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers,
+            },
+        });
     };
 
     // Función corregida para obtener el ID del usuario
@@ -79,7 +104,8 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         getToken,
-        getUserId
+        getUserId,
+        authenticatedFetch
     };
 
     return (

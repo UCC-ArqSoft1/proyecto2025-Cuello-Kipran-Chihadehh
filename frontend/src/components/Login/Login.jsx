@@ -1,6 +1,7 @@
 // Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"; // ✅ Importar useAuth
 import "./Login.css";
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ Usar el contexto
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,11 +28,14 @@ const Login = () => {
 
       const data = await response.json();
 
-      // ✅ Guardar en localStorage como espera AuthContext
-      document.cookie = `token=${data.user.token}`;
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // ✅ Extraer el token y los datos del usuario
+      const { token, ...userData } = data.user;
 
-      navigate("/dashboard");
+      // ✅ Usar la función login del contexto (token, userData)
+      login(userData, token);
+
+      // ✅ La redirección se manejará automáticamente por el contexto
+      navigate("/pagina-principal");
     } catch {
       setError("Credenciales incorrectas");
     }

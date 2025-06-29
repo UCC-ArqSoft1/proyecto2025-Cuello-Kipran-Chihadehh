@@ -28,7 +28,7 @@ const MyActivities = ({ authenticatedFetch }) => {
                 console.log("Fetching user activities...");
 
                 // Obtener el ID del usuario
-                const userId = getUserId();
+                const userId = AuthProvider.getUserId();
 
                 // Verificar que tenemos el ID del usuario
                 if (!userId) {

@@ -28,7 +28,7 @@ function App() {
 
           {/* Dashboard protegido */}
           <Route
-            path="/dashboard"
+            path="/pagina-principal"
             element={
               <ProtectedRoute>
                 <PaginaPrincipal />
