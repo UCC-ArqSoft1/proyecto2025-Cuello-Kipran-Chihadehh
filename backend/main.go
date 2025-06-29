@@ -50,9 +50,6 @@ func main() {
 	router.GET("/users/:id", controllers.GetUserByID)
 	router.PUT("/users/:id", utils.JwtAuthMiddleware(), controllers.UpdateUser)
 	router.DELETE("/users/:id", utils.JwtAuthMiddleware(), controllers.DeleteUser)
-	// Eliminar duplicados si quieres:
-	// router.POST("/users/login", controllers.Login)
-	// router.POST("/users/register", controllers.Register)
 
 	// Activity routes
 	router.GET("/activities", controllers.GetActivities)
@@ -72,7 +69,7 @@ func main() {
 	//Inscriptions routes
 	router.GET("/inscription/:id", controllers.GetInscriptionByID)
 	router.POST("/inscription", controllers.CreateInscription)
-	router.GET("/inscriptions/myactivities", utils.JwtAuthMiddleware(), controllers.GetMyActivities)
+	router.GET("/inscriptions/myactivities/:id", utils.JwtAuthMiddleware(), controllers.GetActivitiesByUser)
 	// ========================================
 	// 4. INICIAR SERVIDOR
 	// ========================================

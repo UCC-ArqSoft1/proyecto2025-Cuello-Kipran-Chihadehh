@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Actividades.css";
-import { AuthProvider } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext"; // Importar useAuth
 
 // Helper function para convertir número de día a nombre
 const getDayName = (dayNumber) => {
@@ -16,25 +16,36 @@ const getDayName = (dayNumber) => {
     return days[dayNumber] || 'Día inválido';
 };
 
-const MyActivities = ({ authenticatedFetch }) => {
+const MyActivities = () => {
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedActivity, setSelectedActivity] = useState(null);
-    const [userId, setUserId] = useState(null);
+
+    // Obtener las funciones de autenticación del contexto
+    const { getUserId, authenticatedFetch, user, isAuthenticated } = useAuth();
+
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                console.log("Fetching user activities...");
-
-                // Obtener el ID del usuario
-                const userId = AuthProvider.getUserId();
-
-                // Verificar que tenemos el ID del usuario
-                if (!userId) {
-                    throw new Error("No se pudo obtener el ID del usuario");
+                // Verificar que el usuario esté autenticado
+                if (!isAuthenticated) {
+                    setError("Usuario no autenticado");
+                    setLoading(false);
+                    return;
                 }
 
+                // Obtener el ID del usuario
+                const userId = getUserId();
+                if (!userId) {
+                    setError("No se pudo obtener el ID del usuario");
+                    setLoading(false);
+                    return;
+                }
+
+                console.log("Fetching user activities for user ID:", userId);
+
+                // Hacer la petición con el ID del usuario en la URL
                 const response = await authenticatedFetch(`http://localhost:8080/inscriptions/myactivities/${userId}`, {
                     method: 'GET',
                     headers: {
@@ -90,8 +101,7 @@ const MyActivities = ({ authenticatedFetch }) => {
                 setActivities(activitiesData);
                 console.log("Activities set:", activitiesData);
 
-            }
-            catch (err) {
+            } catch (err) {
                 console.error("Error fetching activities:", err);
                 setError(err.message);
             } finally {
@@ -100,7 +110,7 @@ const MyActivities = ({ authenticatedFetch }) => {
         };
 
         fetchActivities();
-    }, [authenticatedFetch]);
+    }, [authenticatedFetch, getUserId, isAuthenticated]); // Dependencias correctas
 
     const handleShowDetails = (activity) => {
         setSelectedActivity(activity);
@@ -136,6 +146,7 @@ const MyActivities = ({ authenticatedFetch }) => {
         }
     };
 
+    // Mostrar mensaje de carga mientras se verifica la autenticación
     if (loading) {
         return (
             <div className="my-activities-container">
@@ -147,6 +158,7 @@ const MyActivities = ({ authenticatedFetch }) => {
         );
     }
 
+    // Mostrar error si no está autenticado o hay otros errores
     if (error) {
         return (
             <div className="my-activities-container">

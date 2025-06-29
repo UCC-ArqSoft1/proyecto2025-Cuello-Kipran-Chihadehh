@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -76,9 +77,19 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Agregá el user_id al contexto si lo tenés en el token
-		if userID, ok := claims["user_id"].(float64); ok {
-			c.Set("user_id", int(userID))
+		// CORRECCIÓN: Leer el UserID del campo "jti" (JWT ID) donde se guardó
+		if userIDStr, ok := claims["jti"].(string); ok {
+			if userID, err := strconv.Atoi(userIDStr); err == nil {
+				c.Set("user_id", userID)
+			} else {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "ID de usuario inválido en token"})
+				c.Abort()
+				return
+			}
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "ID de usuario no encontrado en token"})
+			c.Abort()
+			return
 		}
 
 		c.Next()

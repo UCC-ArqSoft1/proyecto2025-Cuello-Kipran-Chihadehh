@@ -196,43 +196,48 @@ func GetInscriptionsByUserID(c *gin.Context) {
 	})
 }
 func GetActivitiesByUser(c *gin.Context) {
-	// Este método requerirá que implementes GetActivitiesByUser en el service
-	// Por ahora solo devuelvo un mensaje indicando que no está implementado
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"message": "GetActivitiesByUser service method not implemented yet",
-	})
-}
+	userId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
 
-// GetMyActivities maneja la obtención de las actividades del usuario autenticado
-func GetMyActivities(c *gin.Context) {
-	// Obtener el ID del usuario del contexto (asumiendo que tienes middleware de autenticación)
-	userID, exists := c.Get("user_id")
+	// Opcional: Verificar que el usuario autenticado tiene permisos para ver estas actividades
+	// (por ejemplo, solo puede ver sus propias actividades o es admin)
+	authenticatedUserID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	// Convertir a int si es necesario
-	var id int
-	switch v := userID.(type) {
+	// Convertir authenticatedUserID a int para comparar
+	var authID int
+	switch v := authenticatedUserID.(type) {
 	case int:
-		id = v
+		authID = v
 	case float64:
-		id = int(v)
+		authID = int(v)
 	case string:
-		var err error
-		id, err = strconv.Atoi(v)
+		authID, err = strconv.Atoi(v)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid authenticated user ID format"})
 			return
 		}
 	default:
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID type"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid authenticated user ID type"})
+		return
+	}
+
+	// Verificar que el usuario solo puede ver sus propias actividades (o implementar lógica de admin)
+	if authID != userId {
+		// Aquí podrías verificar si el usuario es admin
+		// Por ahora, no permitimos que vean actividades de otros usuarios
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot access other user's activities"})
 		return
 	}
 
 	// Obtener las inscripciones del usuario
-	inscriptions, err := services.GetMyActivities(id)
+	inscriptions, err := services.GetMyActivities(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to get user activities",
