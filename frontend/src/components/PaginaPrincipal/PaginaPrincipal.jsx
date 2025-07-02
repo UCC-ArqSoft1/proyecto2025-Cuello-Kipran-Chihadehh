@@ -7,7 +7,6 @@ import './PaginaPrincipal.css';
 import UserList from '../users/UserList';
 import MyActivities from '../Activities/myactivities';
 
-
 const PaginaPrincipal = () => {
   const { user, logout, authenticatedFetch, isAdmin } = useAuth(); // Importar isAdmin
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -264,13 +263,13 @@ const PaginaPrincipal = () => {
         <span className="welcome-fixed">
           Bienvenido, {user?.username}
         </span>
-
         <button onClick={handleLogout} className="logout-button logout-fixed">
           Cerrar Sesión
         </button>
 
         <div className="header-content">
-          <h1>EverLifting</h1>
+          <img src="/fotologo.jpg" alt="Logo-pagina" className='logo-centered' />
+          
           <nav className="header-nav full-width-nav">
             <button
               onClick={() => setActiveSection('dashboard')}
@@ -289,14 +288,6 @@ const PaginaPrincipal = () => {
             >
               Mis Actividades
             </button>
-            {isAdmin() && ( // Mostrar botón de usuarios solo para admins
-              <button
-                onClick={() => setActiveSection('users')}
-                className={`nav-button ${activeSection === 'users' ? 'active' : ''}`}
-              >
-                Usuarios
-              </button>
-            )}
           </nav>
         </div>
       </header>

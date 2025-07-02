@@ -19,11 +19,11 @@ type MysqlClient struct {
 func NewMysqlClient() *MysqlClient {
 	dsnFormat := "%s:%s@tcp(%s:%d)/%s?parseTime=true&charset=utf8mb4&loc=Local"
 	//server isma
-	dsn := fmt.Sprintf(dsnFormat, "root", "Dinorex-2705", "127.0.0.1", 3306, "gym")
+	//dsn := fmt.Sprintf(dsnFormat, "root", "Dinorex-2705", "127.0.0.1", 3306, "gym")
 	//server lucas
 	//dsn := fmt.Sprintf(dsnFormat, "root", "root", "localhost", 3306, "backend")
 	//server franco
-	//dsn := fmt.Sprintf(dsnFormat, "root", "franco2510", "localhost", 3306, "backend")
+	dsn := fmt.Sprintf(dsnFormat, "root", "franco2510", "localhost", 3306, "backend")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
