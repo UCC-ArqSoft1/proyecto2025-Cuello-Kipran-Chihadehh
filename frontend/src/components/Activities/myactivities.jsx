@@ -217,7 +217,7 @@ const MyActivities = () => {
                                         </div>
                                         <div className="activity-time">
                                             <span className="info-label">🕐</span>
-                                            <span>{activity.hora_inicio}</span>
+                                            <span>{activity.hora_inicio + "-" + activity.hora_fin}</span>
                                         </div>
                                         {activity.profesor && (
                                             <div className="activity-teacher">

@@ -237,8 +237,7 @@ const PaginaPrincipal = () => {
       case 'mis-activities':
         return (
           <div className="mis-activities-section">
-            <h2>Mis Actividades</h2>
-            <p>Actividades en las que estás inscrito:</p>
+
             <MyActivities authenticatedFetch={authenticatedFetch || makeAuthenticatedRequest} />
           </div>
         );
@@ -269,7 +268,7 @@ const PaginaPrincipal = () => {
 
         <div className="header-content">
           <img src="/fotologo.jpg" alt="Logo-pagina" className='logo-centered' />
-          
+
           <nav className="header-nav full-width-nav">
             <button
               onClick={() => setActiveSection('dashboard')}
