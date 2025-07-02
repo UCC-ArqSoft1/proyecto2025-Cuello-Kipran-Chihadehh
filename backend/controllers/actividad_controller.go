@@ -58,10 +58,30 @@ func GetActivities(c *gin.Context) {
 	})
 }
 
-// CreateActivity crea una nueva actividad
+// CreateActivity crea una nueva actividad - REQUIERE SER ADMIN
 func CreateActivity(c *gin.Context) {
-	var activity domain.Activity
+	// Verificar autenticación y rol de administrador
+	isAdmin, exists := c.Get("is_admin")
+	if !exists {
+		log.Error("Admin status not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Authentication required",
+			"success": false,
+		})
+		return
+	}
 
+	if isAdmin != true {
+		userID, _ := c.Get("user_id")
+		log.WithField("user_id", userID).Warn("Unauthorized attempt to create activity by non-admin user")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "You do not have permission to create activities",
+			"success": false,
+		})
+		return
+	}
+
+	var activity domain.Activity
 	if err := c.ShouldBindJSON(&activity); err != nil {
 		log.WithError(err).Error("Invalid create activity request")
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -81,7 +101,12 @@ func CreateActivity(c *gin.Context) {
 		return
 	}
 
-	log.WithField("activity_id", createdActivity.ID).Info("Activity created successfully")
+	userID, _ := c.Get("user_id")
+	log.WithFields(log.Fields{
+		"activity_id": createdActivity.ID,
+		"created_by":  userID,
+	}).Info("Activity created successfully")
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message":  "Activity created successfully",
 		"activity": createdActivity,
@@ -89,8 +114,29 @@ func CreateActivity(c *gin.Context) {
 	})
 }
 
-// UpdateActivity actualiza una actividad existente
+// UpdateActivity actualiza una actividad existente - REQUIERE SER ADMIN
 func UpdateActivity(c *gin.Context) {
+	// Verificar autenticación y rol de administrador
+	isAdmin, exists := c.Get("is_admin")
+	if !exists {
+		log.Error("Admin status not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Authentication required",
+			"success": false,
+		})
+		return
+	}
+
+	if isAdmin != true {
+		userID, _ := c.Get("user_id")
+		log.WithField("user_id", userID).Warn("Unauthorized attempt to update activity by non-admin user")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "You do not have permission to update activities",
+			"success": false,
+		})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -123,15 +169,41 @@ func UpdateActivity(c *gin.Context) {
 		return
 	}
 
-	log.WithField("activity_id", id).Info("Activity updated successfully")
+	userID, _ := c.Get("user_id")
+	log.WithFields(log.Fields{
+		"activity_id": id,
+		"updated_by":  userID,
+	}).Info("Activity updated successfully")
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Activity updated successfully",
 		"success": true,
 	})
 }
 
-// DeleteActivity elimina una actividad
+// DeleteActivity elimina una actividad - REQUIERE SER ADMIN
 func DeleteActivity(c *gin.Context) {
+	// Verificar autenticación y rol de administrador
+	isAdmin, exists := c.Get("is_admin")
+	if !exists {
+		log.Error("Admin status not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Authentication required",
+			"success": false,
+		})
+		return
+	}
+
+	if isAdmin != true {
+		userID, _ := c.Get("user_id")
+		log.WithField("user_id", userID).Warn("Unauthorized attempt to delete activity by non-admin user")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "You do not have permission to delete activities",
+			"success": false,
+		})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -152,7 +224,12 @@ func DeleteActivity(c *gin.Context) {
 		return
 	}
 
-	log.WithField("activity_id", id).Info("Activity deleted successfully")
+	userID, _ := c.Get("user_id")
+	log.WithFields(log.Fields{
+		"activity_id": id,
+		"deleted_by":  userID,
+	}).Info("Activity deleted successfully")
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Activity deleted successfully",
 		"success": true,
@@ -296,8 +373,29 @@ func SearchActivitiesByName(c *gin.Context) {
 	})
 }
 
-// UpdateActivitySlots actualiza los cupos de una actividad
+// UpdateActivitySlots actualiza los cupos de una actividad - REQUIERE SER ADMIN
 func UpdateActivitySlots(c *gin.Context) {
+	// Verificar autenticación y rol de administrador
+	isAdmin, exists := c.Get("is_admin")
+	if !exists {
+		log.Error("Admin status not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Authentication required",
+			"success": false,
+		})
+		return
+	}
+
+	if isAdmin != true {
+		userID, _ := c.Get("user_id")
+		log.WithField("user_id", userID).Warn("Unauthorized attempt to update activity slots by non-admin user")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error":   "You do not have permission to update activity slots",
+			"success": false,
+		})
+		return
+	}
+
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -331,9 +429,11 @@ func UpdateActivitySlots(c *gin.Context) {
 		return
 	}
 
+	userID, _ := c.Get("user_id")
 	log.WithFields(log.Fields{
 		"activity_id": id,
 		"new_slots":   request.Cupos,
+		"updated_by":  userID,
 	}).Info("Activity slots updated successfully")
 
 	c.JSON(http.StatusOK, gin.H{
