@@ -77,4 +77,10 @@ func main() {
 	if err := router.Run(":8080"); err != nil {
 		panic("Failed to start server: " + err.Error())
 	}
+	//Inscriptions routes
+	router.GET("/inscription/:id", controllers.GetInscriptionByID)
+	router.POST("/inscription", controllers.CreateInscription)
+	router.GET("/inscriptions/myactivities/:id", utils.JwtAuthMiddleware(), controllers.GetActivitiesByUser)
+	router.DELETE("/inscriptions/:id", utils.JwtAuthMiddleware(), controllers.DeleteInscription) // <--- ADD THIS LINE
+
 }

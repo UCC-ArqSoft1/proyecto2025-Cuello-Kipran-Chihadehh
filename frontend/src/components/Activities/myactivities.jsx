@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Actividades.css";
-import { useAuth } from "../../context/AuthContext"; // Importar useAuth
+import { useAuth } from "../../context/AuthContext";
 
 // Helper function para convertir número de día a nombre
 const getDayName = (dayNumber) => {
@@ -22,20 +22,17 @@ const MyActivities = () => {
     const [error, setError] = useState(null);
     const [selectedActivity, setSelectedActivity] = useState(null);
 
-    // Obtener las funciones de autenticación del contexto
-    const { getUserId, authenticatedFetch, user, isAuthenticated } = useAuth();
+    const { getUserId, authenticatedFetch, isAuthenticated } = useAuth();
 
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                // Verificar que el usuario esté autenticado
                 if (!isAuthenticated) {
                     setError("Usuario no autenticado");
                     setLoading(false);
                     return;
                 }
 
-                // Obtener el ID del usuario
                 const userId = getUserId();
                 if (!userId) {
                     setError("No se pudo obtener el ID del usuario");
@@ -45,7 +42,6 @@ const MyActivities = () => {
 
                 console.log("Fetching user activities for user ID:", userId);
 
-                // Hacer la petición con el ID del usuario en la URL
                 const response = await authenticatedFetch(`http://localhost:8080/inscriptions/myactivities/${userId}`, {
                     method: 'GET',
                     headers: {
@@ -54,44 +50,45 @@ const MyActivities = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                    throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
                 }
 
-                // Verificar si la respuesta es JSON válido
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
                     throw new Error("La respuesta del servidor no es JSON válido");
                 }
 
                 const data = await response.json();
-                console.log("Parsed data:", data);
+                console.log("Received data from server:", data);
 
-                // La respuesta debería ser un array de InscripcionResponse
                 let activitiesData = [];
                 if (Array.isArray(data)) {
-                    // Mapear los datos para que coincidan con lo que espera el frontend
+                    // Mapear correctamente los datos de InscripcionResponse
                     activitiesData = data.map(inscription => ({
-                        // Datos de la inscripción
-                        id: inscription.Id,
-                        usuario_id: inscription.UsuarioId,
-                        actividad_id: inscription.ActividadId,
+                        // ID de la inscripción (para eliminar)
+                        inscriptionId: inscription.id,
 
-                        // Datos de la actividad (desde inscription.Actividad)
-                        name: inscription.Actividad?.Name || 'Sin nombre',
-                        nombre: inscription.Actividad?.Name || 'Sin nombre', // Para compatibilidad
-                        profesor: inscription.Actividad?.Profesor || 'No asignado',
-                        categoria: inscription.Actividad?.Categoria || 'Sin categoría',
-                        cupos: inscription.Actividad?.Cupos || 0,
-                        descripcion: inscription.Actividad?.Description || 'Sin descripción',
-                        dia: inscription.Actividad?.Dia || 0,
-                        hora_inicio: inscription.Actividad?.HoraInicio || 'No especificado',
-                        hora_fin: inscription.Actividad?.HoraFin || 'No especificado',
+                        // Datos básicos de la inscripción
+                        id: inscription.actividad_id, // ID de la actividad para mostrar
+                        usuario_id: inscription.usuario_id,
+                        actividad_id: inscription.actividad_id,
+
+                        // Datos de la actividad
+                        name: inscription.actividad?.name || 'Sin nombre',
+                        nombre: inscription.actividad?.name || 'Sin nombre',
+                        profesor: inscription.actividad?.profesor || 'No asignado',
+                        categoria: inscription.actividad?.categoria || 'Sin categoría',
+                        cupos: inscription.actividad?.cupos || 0,
+                        descripcion: inscription.actividad?.description || 'Sin descripción',
+                        dia: inscription.actividad?.dia || 0,
+                        hora_inicio: inscription.actividad?.hora_inicio || 'No especificado',
+                        hora_fin: inscription.actividad?.hora_fin || 'No especificado',
 
                         // Datos del usuario
-                        usuario: inscription.Usuario
+                        usuario: inscription.usuario
                     }));
                 } else if (data.message) {
-                    // Manejar respuestas de error del servidor
                     throw new Error(data.message);
                 } else {
                     console.warn("Estructura de datos no reconocida:", data);
@@ -99,7 +96,7 @@ const MyActivities = () => {
                 }
 
                 setActivities(activitiesData);
-                console.log("Activities set:", activitiesData);
+                console.log("Activities mapped:", activitiesData);
 
             } catch (err) {
                 console.error("Error fetching activities:", err);
@@ -110,7 +107,7 @@ const MyActivities = () => {
         };
 
         fetchActivities();
-    }, [authenticatedFetch, getUserId, isAuthenticated]); // Dependencias correctas
+    }, [authenticatedFetch, getUserId, isAuthenticated]);
 
     const handleShowDetails = (activity) => {
         setSelectedActivity(activity);
@@ -126,17 +123,17 @@ const MyActivities = () => {
         }
 
         try {
-            // Usar el ID de la inscripción, no de la actividad
             const response = await authenticatedFetch(`http://localhost:8080/inscriptions/${inscriptionId}`, {
                 method: 'DELETE'
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
             }
 
-            // Actualizar la lista de actividades
-            setActivities(prev => prev.filter(activity => activity.id !== inscriptionId));
+            // Actualizar la lista de actividades eliminando por inscriptionId
+            setActivities(prev => prev.filter(activity => activity.inscriptionId !== inscriptionId));
             setSelectedActivity(null);
 
             alert("Te has desinscrito exitosamente de la actividad");
@@ -146,7 +143,6 @@ const MyActivities = () => {
         }
     };
 
-    // Mostrar mensaje de carga mientras se verifica la autenticación
     if (loading) {
         return (
             <div className="my-activities-container">
@@ -158,7 +154,6 @@ const MyActivities = () => {
         );
     }
 
-    // Mostrar error si no está autenticado o hay otros errores
     if (error) {
         return (
             <div className="my-activities-container">
@@ -207,13 +202,13 @@ const MyActivities = () => {
                 <>
                     <div className="activities-grid">
                         {activities.map((activity) => (
-                            <div key={activity.id} className="activity-card enrolled">
+                            <div key={activity.inscriptionId} className="activity-card enrolled">
                                 <div className="enrollment-badge">
                                     <span>✓ Inscrito</span>
                                 </div>
                                 <div className="activity-card-content">
                                     <h3 className="activity-name">
-                                        {activity.name || activity.nombre || 'Actividad sin nombre'}
+                                        {activity.name}
                                     </h3>
                                     <div className="activity-basic-info">
                                         <div className="activity-day">
@@ -222,7 +217,7 @@ const MyActivities = () => {
                                         </div>
                                         <div className="activity-time">
                                             <span className="info-label">🕐</span>
-                                            <span>{activity.hora_inicio || 'No especificado'}</span>
+                                            <span>{activity.hora_inicio}</span>
                                         </div>
                                         {activity.profesor && (
                                             <div className="activity-teacher">
@@ -249,7 +244,7 @@ const MyActivities = () => {
                         <div className="modal-overlay" onClick={handleCloseDetails}>
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                                 <div className="modal-header">
-                                    <h3>{selectedActivity.nombre || selectedActivity.name}</h3>
+                                    <h3>{selectedActivity.name}</h3>
                                     <button
                                         className="close-btn"
                                         onClick={handleCloseDetails}
@@ -265,19 +260,15 @@ const MyActivities = () => {
                                         </span>
                                     </div>
 
-                                    {selectedActivity.categoria && (
-                                        <div className="detail-row">
-                                            <span className="detail-label">Categoría:</span>
-                                            <span className="detail-value">{selectedActivity.categoria}</span>
-                                        </div>
-                                    )}
+                                    <div className="detail-row">
+                                        <span className="detail-label">Categoría:</span>
+                                        <span className="detail-value">{selectedActivity.categoria}</span>
+                                    </div>
 
-                                    {selectedActivity.profesor && (
-                                        <div className="detail-row">
-                                            <span className="detail-label">Profesor:</span>
-                                            <span className="detail-value">{selectedActivity.profesor}</span>
-                                        </div>
-                                    )}
+                                    <div className="detail-row">
+                                        <span className="detail-label">Profesor:</span>
+                                        <span className="detail-value">{selectedActivity.profesor}</span>
+                                    </div>
 
                                     <div className="detail-row">
                                         <span className="detail-label">Día:</span>
@@ -287,46 +278,26 @@ const MyActivities = () => {
                                     <div className="detail-row">
                                         <span className="detail-label">Horario:</span>
                                         <span className="detail-value">
-                                            {selectedActivity.hora_inicio || 'No especificado'}
+                                            {selectedActivity.hora_inicio}
                                             {selectedActivity.hora_fin && ` - ${selectedActivity.hora_fin}`}
                                         </span>
                                     </div>
 
-                                    {selectedActivity.cupos && (
-                                        <div className="detail-row">
-                                            <span className="detail-label">Cupos totales:</span>
-                                            <span className="detail-value">{selectedActivity.cupos}</span>
-                                        </div>
-                                    )}
+                                    <div className="detail-row">
+                                        <span className="detail-label">Cupos disponibles:</span>
+                                        <span className="detail-value">{selectedActivity.cupos}</span>
+                                    </div>
 
-                                    {selectedActivity.ubicacion && (
-                                        <div className="detail-row">
-                                            <span className="detail-label">Ubicación:</span>
-                                            <span className="detail-value">{selectedActivity.ubicacion}</span>
-                                        </div>
-                                    )}
-
-                                    {selectedActivity.descripcion && (
-                                        <div className="detail-row description">
-                                            <span className="detail-label">Descripción:</span>
-                                            <p className="detail-description">{selectedActivity.descripcion}</p>
-                                        </div>
-                                    )}
-
-                                    {selectedActivity.fecha_inscripcion && (
-                                        <div className="detail-row">
-                                            <span className="detail-label">Fecha de inscripción:</span>
-                                            <span className="detail-value">
-                                                {new Date(selectedActivity.fecha_inscripcion).toLocaleDateString()}
-                                            </span>
-                                        </div>
-                                    )}
+                                    <div className="detail-row description">
+                                        <span className="detail-label">Descripción:</span>
+                                        <p className="detail-description">{selectedActivity.descripcion}</p>
+                                    </div>
                                 </div>
 
                                 <div className="modal-footer">
                                     <button
                                         className="uninscribe-btn"
-                                        onClick={() => handleUninscribe(selectedActivity.id)}
+                                        onClick={() => handleUninscribe(selectedActivity.inscriptionId)}
                                     >
                                         Desincribirse
                                     </button>

@@ -195,6 +195,8 @@ func GetInscriptionsByUserID(c *gin.Context) {
 		"user_id": id,
 	})
 }
+
+// Reemplaza la función GetActivitiesByUser en tu controller
 func GetActivitiesByUser(c *gin.Context) {
 	userId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -202,8 +204,7 @@ func GetActivitiesByUser(c *gin.Context) {
 		return
 	}
 
-	// Opcional: Verificar que el usuario autenticado tiene permisos para ver estas actividades
-	// (por ejemplo, solo puede ver sus propias actividades o es admin)
+	// Verificación de autenticación
 	authenticatedUserID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
@@ -228,10 +229,8 @@ func GetActivitiesByUser(c *gin.Context) {
 		return
 	}
 
-	// Verificar que el usuario solo puede ver sus propias actividades (o implementar lógica de admin)
+	// Verificar que el usuario solo puede ver sus propias actividades
 	if authID != userId {
-		// Aquí podrías verificar si el usuario es admin
-		// Por ahora, no permitimos que vean actividades de otros usuarios
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot access other user's activities"})
 		return
 	}

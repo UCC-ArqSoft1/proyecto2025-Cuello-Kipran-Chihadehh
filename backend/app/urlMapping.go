@@ -35,11 +35,9 @@ func mapUrls() {
 
 	// Actualización de cupos
 	router.PUT("/activities/:id/slots", controllers.UpdateActivitySlots)
-
 	// ================ ENROLLMENT ROUTES ================
-	// TODO: Implementar rutas de inscripción cuando sea necesario
-	// router.POST("/enrollments", enrollmentController.CreateEnrollment)
-	// router.GET("/enrollments/user/:user_id", enrollmentController.GetEnrollmentsByUser)
-	// router.GET("/enrollments/activity/:activity_id", enrollmentController.GetEnrollmentsByActivity)
-	// router.DELETE("/enrollments/:id", enrollmentController.DeleteEnrollment)
+	router.POST("/enrollments", controllers.CreateInscription)                    // Ya existe en main.go como /inscription
+	router.GET("/enrollments/user/:user_id", controllers.GetInscriptionsByUserID) // Ya existe en main.go como /inscriptions/myactivities/:id
+	//router.GET("/enrollments/activity/:activity_id", enrollmentController.GetEnrollmentsByActivity) // No implementado en controllers
+	router.DELETE("/enrollments/:id", controllers.DeleteInscription) // <--- ADD THIS LINE
 }

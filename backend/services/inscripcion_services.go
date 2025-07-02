@@ -313,3 +313,33 @@ func GetMyActivities(userID int) ([]domain.Inscripcion, error) {
 	}
 	return result, nil
 }
+
+// DeleteInscription elimina una inscripción y actualiza los cupos de la actividad
+func DeleteInscription(id int) error {
+	inscription, err := clients.GetInscriptionByID(id)
+	if err != nil {
+		return errors.New("inscription not found")
+	}
+
+	// Obtener la actividad para actualizar los cupos
+	activity, err := clients.GetActivityByID(inscription.ID_actividad)
+	if err != nil {
+		// Esto no debería pasar si la FK está bien, pero es una buena práctica
+		return errors.New("associated activity not found")
+	}
+
+	err = clients.DeleteInscription(id)
+	if err != nil {
+		return err
+	}
+
+	// Incrementar los cupos de la actividad
+	newSlots := activity.Cupos + 1
+	err = clients.UpdateActivitySlots(activity.ID_actividad, newSlots)
+	if err != nil {
+		// Loggear el error, pero no fallar la eliminación de la inscripción
+		// log.Printf("Warning: Failed to update activity slots after inscription deletion: %v", err)
+	}
+
+	return nil
+}
