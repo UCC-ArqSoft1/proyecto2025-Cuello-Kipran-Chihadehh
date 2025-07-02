@@ -1,9 +1,8 @@
+// MultipleFiles/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Crear el contexto
 const AuthContext = createContext();
 
-// Hook personalizado para usar el contexto
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
@@ -12,13 +11,11 @@ export const useAuth = () => {
     return context;
 };
 
-// Proveedor del contexto
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Verificar si hay un token guardado al cargar la aplicación
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         const savedUser = localStorage.getItem('user');
@@ -30,7 +27,6 @@ export const AuthProvider = ({ children }) => {
                 setIsAuthenticated(true);
             } catch (error) {
                 console.error('Error parsing saved user:', error);
-                // Limpiar datos corruptos
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('user');
             }
@@ -38,31 +34,28 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // Función para iniciar sesión
     const login = (userData, token) => {
-        console.log('Login called with:', { userData, token }); // Debug
+        console.log('Login called with:', { userData, token });
         localStorage.setItem('authToken', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
+        // Asegurarse de que isAdmin esté en userData antes de guardarlo
+        const userToSave = { ...userData, isAdmin: userData.is_admin || false }; // Asume que el backend envía 'is_admin'
+        localStorage.setItem('user', JSON.stringify(userToSave));
+        setUser(userToSave);
         setIsAuthenticated(true);
     };
 
-    // Función para cerrar sesión
     const logout = () => {
         setUser(null);
         setIsAuthenticated(false);
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        // También limpiar cookies si las usas
         document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     };
 
-    // Función para obtener el token
     const getToken = () => {
         return localStorage.getItem('authToken');
     };
 
-    // Función para hacer peticiones autenticadas
     const authenticatedFetch = async (url, options = {}) => {
         const token = getToken();
 
@@ -76,13 +69,10 @@ export const AuthProvider = ({ children }) => {
         });
     };
 
-    // Función corregida para obtener el ID del usuario
     const getUserId = () => {
         if (user && user.id) {
             return user.id;
         }
-
-        // Como fallback, intentar obtener del localStorage
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
             try {
@@ -93,8 +83,12 @@ export const AuthProvider = ({ children }) => {
                 return null;
             }
         }
-
         return null;
+    };
+
+    // Nueva función para obtener el estado de administrador
+    const isAdmin = () => {
+        return user ? user.isAdmin : false;
     };
 
     const value = {
@@ -105,7 +99,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         getToken,
         getUserId,
-        authenticatedFetch
+        authenticatedFetch,
+        isAdmin // Exportar la función isAdmin
     };
 
     return (

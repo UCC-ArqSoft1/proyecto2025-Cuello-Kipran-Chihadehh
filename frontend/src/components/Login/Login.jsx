@@ -1,7 +1,7 @@
-// Login.jsx
+// MultipleFiles/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // ✅ Importar useAuth
+import { useAuth } from "../../context/AuthContext";
 import "./Login.css";
 
 const Login = () => {
@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ Usar el contexto
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,13 +28,12 @@ const Login = () => {
 
       const data = await response.json();
 
-      // ✅ Extraer el token y los datos del usuario
-      const { token, ...userData } = data.user;
+      // Extraer el token y los datos del usuario, incluyendo is_admin
+      const { token, is_admin, ...userData } = data.user; // Asegúrate de que el backend envía 'is_admin'
 
-      // ✅ Usar la función login del contexto (token, userData)
-      login(userData, token);
+      // Pasar is_admin a la función login del contexto
+      login({ ...userData, is_admin }, token); // Pasa is_admin como parte de userData
 
-      // ✅ La redirección se manejará automáticamente por el contexto
       navigate("/pagina-principal");
     } catch {
       setError("Credenciales incorrectas");

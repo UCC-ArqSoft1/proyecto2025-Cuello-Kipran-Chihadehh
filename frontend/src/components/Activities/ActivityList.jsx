@@ -1,7 +1,7 @@
+// MultipleFiles/ActivityList.jsx
 import React, { useState } from 'react';
 import './Actividades.css';
 
-// Helper function para convertir número de día a nombre
 const getDayName = (dayNumber) => {
     const days = {
         1: 'Lunes',
@@ -15,7 +15,8 @@ const getDayName = (dayNumber) => {
     return days[dayNumber] || 'Día inválido';
 };
 
-const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
+// Recibir la prop isAdmin
+const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, isAdmin }) => {
     const [editingActivity, setEditingActivity] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [selectedActivity, setSelectedActivity] = useState(null);
@@ -193,86 +194,91 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                         </div>
                         <div className="modal-body">
                             {editingActivity === selectedActivity.id ? (
-                                // Formulario de edición
-                                <div className="edit-form">
-                                    <div className="form-group">
-                                        <label>Nombre:</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.nombre || ''}
-                                            onChange={(e) => handleInputChange('nombre', e.target.value)}
-                                            className="edit-input"
-                                        />
+                                // Formulario de edición (solo visible si es admin)
+                                isAdmin ? (
+                                    <div className="edit-form">
+                                        <div className="form-group">
+                                            <label>Nombre:</label>
+                                            <input
+                                                type="text"
+                                                value={editForm.nombre || ''}
+                                                onChange={(e) => handleInputChange('nombre', e.target.value)}
+                                                className="edit-input"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Categoría:</label>
+                                            <input
+                                                type="text"
+                                                value={editForm.categoria || ''}
+                                                onChange={(e) => handleInputChange('categoria', e.target.value)}
+                                                className="edit-input"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Profesor:</label>
+                                            <input
+                                                type="text"
+                                                value={editForm.profesor || ''}
+                                                onChange={(e) => handleInputChange('profesor', e.target.value)}
+                                                className="edit-input"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Día:</label>
+                                            <select
+                                                value={editForm.dia || 1}
+                                                onChange={(e) => handleInputChange('dia', parseInt(e.target.value))}
+                                                className='edit-select'
+                                            >
+                                                <option value={1}>Lunes</option>
+                                                <option value={2}>Martes</option>
+                                                <option value={3}>Miércoles</option>
+                                                <option value={4}>Jueves</option>
+                                                <option value={5}>Viernes</option>
+                                                <option value={6}>Sábado</option>
+                                                <option value={7}>Domingo</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Horario:</label>
+                                            <input
+                                                type="time"
+                                                value={editForm.horario + 'hs' || ''}
+                                                onChange={(e) => handleInputChange('horario', e.target.value)}
+                                                className="edit-input"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Cupos:</label>
+                                            <input
+                                                type="number"
+                                                value={editForm.cupos || ''}
+                                                onChange={(e) => handleInputChange('cupos', parseInt(e.target.value))}
+                                                className="edit-input"
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Descripción:</label>
+                                            <textarea
+                                                value={editForm.descripcion || ''}
+                                                onChange={(e) => handleInputChange('descripcion', e.target.value)}
+                                                className="edit-textarea"
+                                            />
+                                        </div>
+                                        <div className="modal-actions">
+                                            <button className="accion-btn accion-btn-save" onClick={handleSave}>
+                                                Guardar
+                                            </button>
+                                            <button className="accion-btn accion-btn-cancel" onClick={handleCancel}>
+                                                Cancelar
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="form-group">
-                                        <label>Categoría:</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.categoria || ''}
-                                            onChange={(e) => handleInputChange('categoria', e.target.value)}
-                                            className="edit-input"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Profesor:</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.profesor || ''}
-                                            onChange={(e) => handleInputChange('profesor', e.target.value)}
-                                            className="edit-input"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Día:</label>
-                                        <select
-                                            value={editForm.dia || 1}
-                                            onChange={(e) => handleInputChange('dia', parseInt(e.target.value))}
-                                            className='edit-select'
-                                        >
-                                            <option value={1}>Lunes</option>
-                                            <option value={2}>Martes</option>
-                                            <option value={3}>Miércoles</option>
-                                            <option value={4}>Jueves</option>
-                                            <option value={5}>Viernes</option>
-                                            <option value={6}>Sábado</option>
-                                            <option value={7}>Domingo</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Horario:</label>
-                                        <input
-                                            type="time"
-                                            value={editForm.horario + 'hs' || ''}
-                                            onChange={(e) => handleInputChange('horario', e.target.value)}
-                                            className="edit-input"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Cupos:</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.cupos || ''}
-                                            onChange={(e) => handleInputChange('cupos', parseInt(e.target.value))}
-                                            className="edit-input"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Descripción:</label>
-                                        <textarea
-                                            value={editForm.descripcion || ''}
-                                            onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                                            className="edit-textarea"
-                                        />
-                                    </div>
-                                    <div className="modal-actions">
-                                        <button className="accion-btn accion-btn-save" onClick={handleSave}>
-                                            Guardar
-                                        </button>
-                                        <button className="accion-btn accion-btn-cancel" onClick={handleCancel}>
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </div>
+                                ) : (
+                                    // Mensaje para usuarios no administradores
+                                    <div>No tienes permisos para editar esta actividad.</div>
+                                )
                             ) : (
                                 // Vista de detalles
                                 <>
@@ -302,20 +308,22 @@ const ActivityList = ({ activities, onUpdate, onDelete, onInscribe, user }) => {
                                             <p className="detail-description">{selectedActivity.description}</p>
                                         </div>
                                     )}
-                                    <div className="modal-actions">
-                                        <button
-                                            className="accion-btn accion-btn-edit"
-                                            onClick={() => handleEdit(selectedActivity)}
-                                        >
-                                            Editar
-                                        </button>
-                                        <button
-                                            className="accion-btn accion-btn-delete"
-                                            onClick={() => handleDelete(selectedActivity)}
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </div>
+                                    {isAdmin && ( // Mostrar botones de acción solo para admins
+                                        <div className="modal-actions">
+                                            <button
+                                                className="accion-btn accion-btn-edit"
+                                                onClick={() => handleEdit(selectedActivity)}
+                                            >
+                                                Editar
+                                            </button>
+                                            <button
+                                                className="accion-btn accion-btn-delete"
+                                                onClick={() => handleDelete(selectedActivity)}
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"backend/clients" // Importar el paquete clients para acceder a la base de datos
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -77,10 +79,19 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// CORRECCIÓN: Leer el UserID del campo "jti" (JWT ID) donde se guardó
 		if userIDStr, ok := claims["jti"].(string); ok {
 			if userID, err := strconv.Atoi(userIDStr); err == nil {
 				c.Set("user_id", userID)
+
+				// Obtener el usuario de la base de datos para verificar si es admin
+				user, err := clients.GetUserByID(userID) // Asumiendo que GetUserByID está en clients
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener información del usuario"})
+					c.Abort()
+					return
+				}
+				c.Set("is_admin", user.IsAdmin) // Almacenar el estado de administrador en el contexto
+
 			} else {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "ID de usuario inválido en token"})
 				c.Abort()
@@ -92,6 +103,17 @@ func JwtAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		c.Next()
+	}
+}
+func AdminAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		isAdmin, exists := c.Get("is_admin")
+		if !exists || isAdmin != true {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Acceso denegado. Se requiere rol de administrador."})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }
